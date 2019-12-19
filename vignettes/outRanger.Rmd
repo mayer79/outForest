@@ -1,0 +1,128 @@
+---
+title: "Using outRanger"
+author: "Michael Mayer"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{outRanger}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Introduction
+
+The aim of this vignette is to introduce the R package `outRanger` for outlier detection and replacement.
+
+Uses the 'ranger' package [1] to identify outliers in numeric variables. Each numeric variable to be checked is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. Since the random forest algorithm [1] does not allow for missing values, they are first imputed by chained random forests, see e.g. [2] or [3].
+
+In the examples below, we will meet two functions from the `outRanger` package:
+
+- `generateOutlier`: To add nasty outliers to a data set.
+
+- `outRanger`: To identify outliers in numeric variables of a data frame.
+
+## Installation
+
+From CRAN:
+```
+install.packages("outRanger")
+```
+
+Latest version from github:
+```
+library(devtools)
+install_github("mayer79/outRanger")
+```
+
+## Examples
+
+We first generate a data set with about 10% outliers per column and try to identify with `outRanger`.
+
+``` {r}
+library(outRanger)
+ 
+# Generate data with outliers in numeric columns
+irisWithOutliers <- generateOutlier(iris, seed = 34)
+head(irisWithOutliers)
+ 
+# Find and replace outliers by random forest regressions
+iris2 <- outRanger(irisWithOutliers, replace = "predictions")
+ 
+# Check results
+head(iris2)
+
+# The signed outlier scores
+head(attr(iris2, "scores"))
+
+```
+
+It worked! Unfortunately, the new values look somewhat unnatural due to different rounding. If we would like to avoid this, we just set the `pmm.k` argument to a positive number. All replacements done during the process are then combined with a predictive mean matching (PMM) step, leading to more natural replacements and improved distributional properties of the resulting values:
+
+``` {r}
+head(iris3 <- outRanger(irisWithOutliers, pmm.k = 3))
+```
+
+Note that `outRanger` offers a `...` argument to pass options to `ranger`, e.g. `num.trees` or `min.node.size`. How would we use its "extra trees" variant with 50 trees?
+
+``` {r}
+head(outRanger(irisWithOutliers, pmm.k = 3, splitrule = "extratrees", num.trees = 50))
+```
+
+It is as simple!
+
+Further note that `outRanger` does not rely on `tidyverse` but you can embed it into a `dplyr` pipeline (without `group_by`). Make sure to set `verbose = 0` in order to prevent messages flooding your screen.
+
+``` {r}
+require(dplyr)
+
+iris %>% 
+  generateNA %>% 
+  as_tibble %>% 
+  outRanger(verbose = 0) %>% 
+  head
+  
+```
+
+By default `outRanger` uses all columns in the data set to check all numeric columns with missings. To override this behaviour, you can use an intuitive formula interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
+
+So if you e.g. want to check only variable `Sepal.Length`, then use this syntax.
+``` {r}
+head(outRanger(irisWithOutliers, Sepal.Length ~ .))
+
+```
+
+## The algorithm takes too much time. What can I do?
+
+`outRanger` is based on fitting one random forest for each numeric variable. Since the underlying random forest implementation `ranger` uses 500 trees per default, a huge number of trees might be calculated. For larger data sets, the overall process can take very long.
+
+Here are tweaks to make things faster:
+
+- Use less trees, e.g. by setting `num.trees = 50`. Even one single tree might be sufficient. Typically, the number of iterations until convergence will increase with fewer trees though.
+
+- Use smaller number of variables to be considered in a split, e.g. `mtry = 2`.
+
+- Use smaller bootstrap samples by setting e.g. `sample.fraction = 0.1`.
+
+- Use the less greedy `splitrule = "extratrees"`.
+
+- Use a low tree depth `max.depth = 6`.
+
+- Use large leafs, e.g. `min.node.size = 10000`.
+
+- Use a low `max.iter`, e.g. 1 or 2.
+
+## References
+[1]  Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. http://arxiv.org/abs/1508.04409. 
+ 
+[2]  Stekhoven, D.J. and Buehlmann, P. (2012). MissForest - nonparametric missing value imputation for mixed-type data. Bioinformatics, 28(1), 112-118.
+
+[3]  Van Buuren, S. and Groothuis-Oudshoorn, K. (2011). mice: Multivariate Imputation by Chained Equations in R. Journal of Statistical Software, 45(3), 1-67. http://www.jstatsoft.org/v45/i03/
