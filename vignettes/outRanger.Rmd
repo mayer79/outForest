@@ -22,13 +22,13 @@ knitr::opts_chunk$set(
 
 The aim of this vignette is to introduce the R package `outRanger` for outlier detection and replacement.
 
-Uses the 'ranger' package [1] to identify outliers in numeric variables. Each numeric variable to be checked is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. Since the random forest algorithm [1] does not allow for missing values, they are first imputed by chained random forests, see e.g. [2] or [3].
+Uses the 'ranger' package [1] to identify outliers in numeric variables. Each numeric variable to be checked is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. Since the random forest algorithm [1] does not allow for missing values, they are first imputed by chained random forests, see e.g. [2] or [3]. After identification, the values can be replaced e.g. by predictive mean matching from the non-outliers.
 
 In the examples below, we will meet two functions from the `outRanger` package:
 
 - `generateOutlier`: To add nasty outliers to a data set.
 
-- `outRanger`: To identify outliers in numeric variables of a data frame.
+- `outRanger`: To identify and replace outliers in numeric variables of a data frame.
 
 ## Installation
 
@@ -45,7 +45,7 @@ install_github("mayer79/outRanger")
 
 ## Examples
 
-We first generate a data set with about 10% outliers per column and try to identify with `outRanger`.
+We first generate a data set with about 5% outliers per column and try to identify with `outRanger`.
 
 ``` {r}
 library(outRanger)
@@ -65,16 +65,16 @@ head(attr(iris2, "scores"))
 
 ```
 
-It worked! Unfortunately, the new values look somewhat unnatural due to different rounding. If we would like to avoid this, we just set the `pmm.k` argument to a positive number. All replacements done during the process are then combined with a predictive mean matching (PMM) step, leading to more natural replacements and improved distributional properties of the resulting values:
+It worked! Unfortunately, the new values look somewhat unnatural due to different rounding. If we would like to avoid this, we just use the default `replace = "pmm"`. All replacements are now based on predictive mean matching (PMM) on the OOB predictions, leading to more natural replacements and improved distributional properties of the resulting values:
 
 ``` {r}
-head(iris3 <- outRanger(irisWithOutliers, pmm.k = 3))
+head(iris3 <- outRanger(irisWithOutliers))
 ```
 
 Note that `outRanger` offers a `...` argument to pass options to `ranger`, e.g. `num.trees` or `min.node.size`. How would we use its "extra trees" variant with 50 trees?
 
 ``` {r}
-head(outRanger(irisWithOutliers, pmm.k = 3, splitrule = "extratrees", num.trees = 50))
+head(outRanger(irisWithOutliers, splitrule = "extratrees", num.trees = 50))
 ```
 
 It is as simple!
@@ -85,10 +85,9 @@ Further note that `outRanger` does not rely on `tidyverse` but you can embed it 
 require(dplyr)
 
 iris %>% 
-  generateNA %>% 
-  as_tibble %>% 
+  generateOutlier() %>% 
   outRanger(verbose = 0) %>% 
-  head
+  head()
   
 ```
 
@@ -96,7 +95,7 @@ By default `outRanger` uses all columns in the data set to check all numeric col
 
 So if you e.g. want to check only variable `Sepal.Length`, then use this syntax.
 ``` {r}
-head(outRanger(irisWithOutliers, Sepal.Length ~ .))
+head(outRanger(irisWithOut, Sepal.Length ~ .))
 
 ```
 

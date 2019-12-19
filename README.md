@@ -1,6 +1,6 @@
 # outRanger
 
-Uses the 'ranger' package [1] to identify outliers in numeric variables. Each numeric variable to be checked is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. Since the random forest algorithm [1] does not allow for missing values, they are first imputed by chained random forests, see e.g. [2] or [3].
+This package uses the 'ranger' package [1] to identify outliers in numeric variables. Each numeric variable to be checked is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. Since the random forest algorithm [1] does not allow for missing values, they are first imputed by chained random forests, see e.g. [2] or [3].
 
 ## Installation
 From CRAN:
@@ -16,7 +16,7 @@ install_github("mayer79/outRanger")
 
 ## Examples
 
-We first generate a data set with about 10% outliers values in each column. Then, we try to identify them.
+We first generate a data set with about 5% outliers values in each column. Then, we try to identify them.
 
 ``` r
 library(outRanger)
@@ -25,8 +25,8 @@ library(outRanger)
 irisWithOutliers <- generateOutlier(iris, seed = 34)
 head(irisWithOutliers)
  
-# Find and replace outliers by random forest regressions
-iris2 <- outRanger(irisWithOutliers, replace = "predictions")
+# Find outliers by random forest regressions and replace them by predictive mean matching.
+iris2 <- outRanger(irisWithOutliers)
  
 # Check results
 head(iris2)
