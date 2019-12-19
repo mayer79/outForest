@@ -1,6 +1,6 @@
 # outRanger
 
-This package uses the 'ranger' package [1] to identify outliers in numeric variables. Each numeric variable to be checked is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. Since the random forest algorithm [1] does not allow for missing values, they are first imputed by chained random forests, see e.g. [2] or [3].
+`outRanger` is a random forest regression based anomaly detection method. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers.
 
 ## Installation
 From CRAN:
@@ -35,11 +35,3 @@ head(iris2)
 head(attr(iris2, "scores"))
 
 ```
-
-## References
-[1]  Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. http://arxiv.org/abs/1508.04409. 
-
-[2]  Stekhoven, D.J. and Buehlmann, P. (2012). MissForest - nonparametric missing value imputation for mixed-type data. Bioinformatics, 28(1), 112-118, doi: 10.1093/bioinformatics/btr597
-
-[3]  Van Buuren, S. and Groothuis-Oudshoorn, K. (2011). mice: Multivariate Imputation by Chained Equations in R. Journal of Statistical Software, 45(3), 1-67. http://www.jstatsoft.org/v45/i03/
-

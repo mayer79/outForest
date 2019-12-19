@@ -1,6 +1,6 @@
 #' Outlier Detection and Replacement by Random Forest Predictions
 #' 
-#' Uses the "ranger" package [1] to identify outliers in numeric variables. Each numeric variable to be checked is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. Since the random forest algorithm [1] does not allow for missing values, they are first imputed by chained random forests. If the data sets are too large for multivariate imputation, try univariate imputation.
+#' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm `ranger` [2] does not allow for missing values, any missing value is first being imputed by chained random forests.
 #' 
 #' @importFrom stats scale reformulate terms.formula predict
 #' @importFrom ranger ranger
@@ -22,8 +22,8 @@
 #' The following arguments are e.g. incompatible with \code{ranger}: \code{write.forest}, \code{probability}, \code{dependent.variable.name}, and \code{classification}. 
 #' @return A \code{data.frame}.
 #' @references
-#' [1] Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. 
-#' http://arxiv.org/abs/1508.04409.
+#' [1] Chandola V., Banerjee A., and Kumar V. (2009). Anomaly detection: A survey. ACM Comput. Surv. 41, 3, Article 15 <dx.doi.org/10.1145/1541880.1541882>.
+#' [2] Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. <arxiv.org/abs/1508.04409>.
 #' @export
 #' @examples
 #' head(irisWithOut <- generateOutlier(iris, seed = 345))

@@ -18,7 +18,7 @@ create_package(
     Type = "Package",
     Version = "0.1.0",
     Date = Sys.Date(),
-    Description = "Uses the 'ranger' package [1] to identify outliers in numeric variables. Each numeric variable to be checked is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. Since the random forest algorithm [1] does not allow for missing values, they are first imputed by chained random forests.",
+    Description = "Provides a random forest based implementation of the method described in Chapter 7.1.2 ('Regression Model Based Anomaly detection') of Chandola et al. (2009) <dx.doi.org/10.1145/1541880.1541882>. It works as follows: Each numeric variable to be checked is regressed onto all other variables. If the absolute difference between observed value and out-of-bag prediction of the corresponding random forest regression is too large, then a value is considered an outlier. Our package offers different ways to replace such outliers, e.g. by realistic values found via preditive mean matching.",
 
     `Authors@R` = "c(person('Michael', 'Mayer', email = 'mayermichael79@gmail.com', role = c('aut', 'cre', 'cph'))",
     Depends = "R (>= 3.5.0)",
