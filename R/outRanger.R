@@ -1,4 +1,4 @@
-#' Outlier Detection and Replacement by Random Forest Predictions
+#' Multivariate Outlier Detection and Replacement by Random Forest Predictions
 #' 
 #' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm `ranger` [2] does not allow for missing values, any missing value is first being imputed by chained random forests.
 #' 
@@ -12,7 +12,8 @@
 #' @param replace Should outliers be replaced by predicting mean matching on the OOB predictions ("pmm", the default), by OOB predictions ("predictions"), by \code{NA} ("NA"). Use "no" to keep outliers as they are.
 #' @param pmm.k For \code{replace = "pmm"}, how many nearest neighbours (without outliers) be considered to sample values from?
 #' @param z_score Z score used to identify outliers. The default is 3.
-#' @param n_max Maximal number of outliers to identify. Will be used on top of the z score criterion.
+#' @param max_n_outlier Maximal number of outliers to identify. Will be used on top of the z score criterion.
+#' @param max_prop_outlier Maximal relative count of outliers. Will be used on top of the z score criterion.
 #' @param summary If TRUE (default), different attributes are added to the output.
 #' @param impute_multivariate If \code{TRUE} (default), missing values are imputed by \code{missRanger::missRanger}. Otherwise, by univariate sampling.
 #' @param impute_multivariate_control Parameters passed to \code{missRanger::missRanger} if data contains missing values.
@@ -20,7 +21,7 @@
 #' @param verbose Controls how much info is printed to screen. 0 to print nothing, 1 prints information.
 #' @param ... Arguments passed to \code{ranger}. If the data set is large, use less trees (e.g. \code{num.trees = 20}) and/or a low value of \code{mtry}. 
 #' The following arguments are e.g. incompatible with \code{ranger}: \code{write.forest}, \code{probability}, \code{dependent.variable.name}, and \code{classification}. 
-#' @return A \code{data.frame}.
+#' @return An object of type \code{outRanger} and a list. The data set with replaced values can be accessed by \code{$data}.
 #' @references
 #' [1] Chandola V., Banerjee A., and Kumar V. (2009). Anomaly detection: A survey. ACM Comput. Surv. 41, 3, Article 15 <dx.doi.org/10.1145/1541880.1541882>.
 #' [2] Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. <arxiv.org/abs/1508.04409>.
@@ -31,7 +32,7 @@
 #' head(irisReplaced <- outRanger(irisWithOut))
 outRanger <- function(data, formula = . ~ ., 
                       replace = c("pmm", "predictions", "NA", "no"), pmm.k = 3,
-                      z_score = 3, n_max = Inf, summary = TRUE,
+                      z_score = 3, max_n_outlier = Inf, max_prop_outlier = 1, summary = TRUE,
                       impute_multivariate = TRUE,
                       impute_multivariate_control = list(pmm.k = 3, num.trees = 20, maxiter = 2L), 
                       seed = NULL, verbose = 1, ...) {
@@ -57,14 +58,15 @@ outRanger <- function(data, formula = . ~ .,
   
   # Fill missing values
   all_relevant <- unique(unlist(relevantVars))
-  if (anyNA(data[, all_relevant, drop = FALSE])) {
+  data <- data[, all_relevant, drop = FALSE]
+  if (anyNA(data)) {
     if (impute_multivariate) {
       ff <- paste(all_relevant, collapse = "+")
       missRanger_args <- c(list(data = data, formula = as.formula(paste(ff, ff, sep = "~")), 
                                 verbose = verbose), impute_multivariate_control)
       data <- do.call(missRanger, missRanger_args)
     } else {
-      data[, all_relevant] <- imputeUnivariate(data[, all_relevant, drop = FALSE])
+      data <- imputeUnivariate(data)
     }
   }
 
@@ -72,33 +74,32 @@ outRanger <- function(data, formula = . ~ .,
     cat("\nOutlier identification by random forests\n")
   }
   
-  # Pick numeric variables from lhs
+  # Pick numeric variables from lhs and determine variable names v to check
   predData <- outData <- Filter(is.numeric, data[, relevantVars[[1]], drop = FALSE])
   v <- colnames(outData)
-  if (!(m <- length(v))) {
+  m <- length(v)
+  if (m == 0L) {
     return(dataOrig)
   }
-  if ((was_any_NA <- anyNA(outData))) {
-    wasNAData <- is.na(outData)
+  # Keep missingness info in original data
+  if ((was_any_NA <- anyNA(dataOrig[, v, drop = FALSE]))) {
+    wasNAData <- is.na(dataOrig[, v, drop = FALSE])
   }
   if (verbose) {
     cat("\n  Variables to check:\t\t")
     cat(v, sep = ", ")
     cat("\n  Variables used to check:\t")
     cat(relevantVars[[2]], sep = ", ")
-    if (m >= 2L) {
-      pb <- txtProgressBar(1, length(v), style = 3)  
-    }
+    cat("\n\n  Checking: ")
   }
 
   # Check each variable
-  for (i in seq_len(m)) { # 1 <- 1
-    v <- v[i]
-    fit <- ranger(formula = reformulate(setdiff(relevantVars[[2]], v), response = v), data = data)#, ...)
-    predData[[v]] <- fit$predictions
-    if (verbose && m > 2L) {
-      setTxtProgressBar(pb, i)
+  for (vv in v) { # 1 <- 1
+    if (verbose) {
+      cat(vv, " ")
     }
+    fit <- ranger(formula = reformulate(setdiff(relevantVars[[2]], vv), response = vv), data = data)#, ...)
+    predData[[vv]] <- fit$predictions
   }
   
   # Calculate outlier scores and status
@@ -107,18 +108,28 @@ outRanger <- function(data, formula = . ~ .,
     scores[wasNAData] <- 0 
   }
   outlier <- abs(scores) > z_score
-  if (sum(outlier) > n_max) {
-    outlier <- abs(scores) >= sort(abs(scores[outlier]), decreasing = TRUE)[n_max]
+  
+  # Bound outlier count
+  max_n_outlier <- min(max_n_outlier, max_prop_outlier * n * m)
+  if (sum(outlier) > max_n_outlier) {
+    outlier <- abs(scores) >= sort(abs(scores[outlier]), decreasing = TRUE)[max_n_outlier]
   }
+  
+  # Sparse representation of outliers and their scores
+  pos <- which(outlier, arr.ind = TRUE)
+  value_pos <- data.frame(pos)
+  value_pos[["col"]] <- v[value_pos[["col"]]]
+  value_pos[["score"]] <- scores[outlier]
+  value_pos[["value"]] <- dataOrig[, v][outlier]
   
   # Replace values
   if (replace != "no") {
     if (replace == "pmm") {
-      for (v in v) { # v <- "Sepal.Length"
-        if (any(is_out <- outlier[, v])) {
-          nn <- knnx.index(predData[[v]][!is_out], query = predData[[v]][is_out], k = pmm.k)
+      for (vv in v) { # v <- "Sepal.Length"
+        if (any(is_out <- outlier[, vv])) {
+          nn <- knnx.index(predData[[vv]][!is_out], query = predData[[vv]][is_out], k = pmm.k)
           take <- t(rmultinom(sum(is_out), 1L, rep(1L, pmm.k)))
-          dataOrig[, v][is_out] <- data[[v]][!is_out][rowSums(nn * take)]
+          dataOrig[, vv][is_out] <- data[[vv]][!is_out][rowSums(nn * take)]
         }
       } 
     } else {
@@ -126,15 +137,17 @@ outRanger <- function(data, formula = . ~ .,
     }
   }
 
+  out <- list(data = dataOrig,
+              v = v,
+              n_outliers = colSums(outlier),
+              value_pos = value_pos)
+  class(out) <- c("outRanger", "list")
+  
   if (verbose) {
     cat("\n")
   }
-  if (summary) {
-    attr(dataOrig, "v") <- v
-    attr(dataOrig, "scores") <- scores
-    attr(dataOrig, "outlier") <- outlier
-  }
-  dataOrig
+  
+  out
 }
 
 

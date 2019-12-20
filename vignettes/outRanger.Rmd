@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The aim of this vignette is to introduce the R package `outRanger` for outlier detection and replacement.
+The aim of this vignette is to introduce the R package `outRanger` for multivariate outlier detection and replacement.
 
 `outRanger` is a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers.
 

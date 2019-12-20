@@ -2,7 +2,10 @@
 # BUILD THE PACKAGE
 #=====================================================================================
 
-# lapply(list.files("R", full.names = TRUE), source)
+library(ranger)
+library(missRanger)
+library(FNN)
+lapply(list.files("R", full.names = TRUE), source)
 
 library(usethis)
 library(devtools)
@@ -14,7 +17,7 @@ pkg <- file.path("release", "outRanger")
 create_package(
   pkg,
   fields = list(
-    Title = "Outlier Detection and Replacement by Random Forest Predictions",
+    Title = "Multivariate Outlier Detection and Replacement by Random Forest Predictions",
     Type = "Package",
     Version = "0.1.0",
     Date = Sys.Date(),
@@ -31,6 +34,7 @@ file.copy(file.path(pkg, "DESCRIPTION"), to = getwd(), overwrite = TRUE)
 use_package("stats", "Imports")
 use_package("ranger", "Imports")
 use_package("missRanger", "Imports", min_version = "2.1.0")
+use_package("ggplot2", "Imports")
 use_package("knitr", "Suggests")
 
 # Set up other files -------------------------------------------------
