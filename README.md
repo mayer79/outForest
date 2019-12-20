@@ -1,6 +1,6 @@
 # outRanger
 
-`outRanger` is a random forest regression based multivariate anomaly detection method. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers.
+`outRanger` is a random forest regression based multivariate anomaly detection method. Each numeric variable is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than a prespecified z-score, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers.
 
 ## Installation
 From CRAN:
@@ -26,12 +26,15 @@ irisWithOutliers <- generateOutlier(iris, seed = 34)
 head(irisWithOutliers)
  
 # Find outliers by random forest regressions and replace them by predictive mean matching.
-iris2 <- outRanger(irisWithOutliers)
- 
-# Check results
-head(iris2)
+(out <- outRanger(irisWithOutliers))
 
-# The signed outlier scores
-head(attr(iris2, "scores"))
+# Plot the number of outliers per numeric variable
+plot(out)
+
+# Information on all outliers
+out$info
+
+# Resulting data set with replaced outliers
+head(out$data)
 
 ```

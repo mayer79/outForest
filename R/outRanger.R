@@ -1,13 +1,13 @@
 #' Multivariate Outlier Detection and Replacement by Random Forest Predictions
 #' 
-#' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the absolute difference between observed value and out-of-bag prediction is too large, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm `ranger` [2] does not allow for missing values, any missing value is first being imputed by chained random forests.
+#' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than some predefined z-score (default is 3), then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm "ranger" [2] does not allow for missing values, any missing value is first being imputed by chained random forests.
 #' 
 #' @importFrom stats scale reformulate terms.formula predict
 #' @importFrom ranger ranger
 #' @importFrom missRanger missRanger imputeUnivariate
 #' @importFrom stats rmultinom
 #' @importFrom FNN knnx.index
-#' @param data A \code{data.frame} or \code{tibble} to be assessed for numeric outliers.
+#' @param data A \code{data.frame} to be assessed for numeric outliers.
 #' @param formula A two-sided formula specifying variables to be checked (left hand side) and variables used to check (right hand side). Defaults to . ~ ., i.e. use all variables to check all (numeric) variables. 
 #' @param replace Should outliers be replaced by predicting mean matching on the OOB predictions ("pmm", the default), by OOB predictions ("predictions"), by \code{NA} ("NA"). Use "no" to keep outliers as they are.
 #' @param pmm.k For \code{replace = "pmm"}, how many nearest neighbours (without outliers) be considered to sample values from?
@@ -106,7 +106,7 @@ outRanger <- function(data, formula = . ~ .,
   }
   
   # Calculate outlier scores and status
-  scores <- scale(data_rel[, v, drop = FALSE] - predData)
+  scores <- scale(data_rel[, v, drop = FALSE] - predData, center = FALSE)
   if (was_any_NA) {
     scores[wasNAData] <- 0 
   }
@@ -123,8 +123,7 @@ outRanger <- function(data, formula = . ~ .,
   info[["col"]] <- v[info[["col"]]]
   info[["observed"]] <- data[, v][outlier]
   info[["predicted"]] <- predData[outlier]
-  info[["scale_center"]] <- attributes(scores)$`scaled:center`[info[["col"]]] 
-  info[["scale_scale"]] <- attributes(scores)$`scaled:scale`[info[["col"]]] 
+  info[["rmse"]] <- attributes(scores)$`scaled:scale`[info[["col"]]] 
   info[["score"]] <- scores[outlier]
   
   # Replace values

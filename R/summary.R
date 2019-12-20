@@ -1,6 +1,6 @@
-#' Summary outRanger
+#' Summarizes outRanger
 #'
-#' Summary method for an object of class \code{outRanger}.
+#' Summary method for an object of class \code{outRanger}. Besides the number of outliers per variables, it shows univariate distributions of the values considered as outliers.
 #'
 #' @param x A on object of class \code{outRanger}.
 #' @param ... Further arguments passed from other methods.

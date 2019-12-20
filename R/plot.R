@@ -1,18 +1,18 @@
-#' Visualize Outliers
+#' Plot for outRanger
 #'
-#' "counts" are represented by a bar plot, while the other options are visualized as scatter plots.
+#' This function can plot different aspects of an outRanger object. For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot. For \code{what = "scores"}, normalized outlier scores (i.e. the difference between predicted and observed value) are shown as scatter plot per variable.
 #'
 #' @importFrom graphics text barplot stripchart abline
 #' @method plot outRanger
 #' @param x An object of class \code{outRanger}.
 #' @param what What should be plotted? One of "counts" (the default) or "scores". 
-#' @param ... Further arguments passed to \code{geom_bar}.
+#' @param ... Further arguments passed to \code{graphics::barplot} or \code{graphics::stripchart}.
 #' @return An object of class \code{ggplot2}.
 #' @export
 #' @examples
 #' x <- outRanger(iris, verbose = 0)
-#' plot(x, fill = "darkred")
-#' plot(x, fill = "darkred", what = "scores")
+#' plot(x)
+#' plot(x, what = "scores")
 #' @seealso \code{\link{light_performance}}.
 plot.outRanger <- function(x, what = c("counts", "scores"), ...) {
   what <- match.arg(what)
