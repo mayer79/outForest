@@ -2,6 +2,7 @@
 # BUILD THE PACKAGE
 #=====================================================================================
 
+library(ggplot2)
 library(ranger)
 library(missRanger)
 library(FNN)
@@ -32,9 +33,9 @@ create_package(
 file.copy(file.path(pkg, "DESCRIPTION"), to = getwd(), overwrite = TRUE)
 # Use package has no option to look for pkg, so we first copy description from pkg, modify it and move back
 use_package("stats", "Imports")
+use_package("graphics", "Imports")
 use_package("ranger", "Imports")
 use_package("missRanger", "Imports", min_version = "2.1.0")
-use_package("ggplot2", "Imports")
 use_package("knitr", "Suggests")
 
 # Set up other files -------------------------------------------------

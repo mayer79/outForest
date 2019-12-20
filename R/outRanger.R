@@ -50,23 +50,21 @@ outRanger <- function(data, formula = . ~ .,
     set.seed(seed)
   }  
   
-  dataOrig <- data
-  
   # Extract lhs and rhs from formula
   relevantVars <- lapply(formula[2:3], function(z) attr(terms.formula(
     reformulate(z), data = data[1, ]), "term.labels"))
   
   # Fill missing values
   all_relevant <- unique(unlist(relevantVars))
-  data <- data[, all_relevant, drop = FALSE]
-  if (anyNA(data)) {
+  data_rel <- data[, all_relevant, drop = FALSE]
+  if (anyNA(data_rel)) {
     if (impute_multivariate) {
       ff <- paste(all_relevant, collapse = "+")
-      missRanger_args <- c(list(data = data, formula = as.formula(paste(ff, ff, sep = "~")), 
+      missRanger_args <- c(list(data = data_rel, formula = as.formula(paste(ff, ff, sep = "~")), 
                                 verbose = verbose), impute_multivariate_control)
-      data <- do.call(missRanger, missRanger_args)
+      data_rel <- do.call(missRanger, missRanger_args)
     } else {
-      data <- imputeUnivariate(data)
+      data_rel <- imputeUnivariate(data_rel)
     }
   }
 
@@ -75,15 +73,15 @@ outRanger <- function(data, formula = . ~ .,
   }
   
   # Pick numeric variables from lhs and determine variable names v to check
-  predData <- outData <- Filter(is.numeric, data[, relevantVars[[1]], drop = FALSE])
-  v <- colnames(outData)
+  predData <- Filter(is.numeric, data_rel[, relevantVars[[1]], drop = FALSE])
+  v <- colnames(predData)
   m <- length(v)
   if (m == 0L) {
-    return(dataOrig)
+    return(data)
   }
   # Keep missingness info in original data
-  if ((was_any_NA <- anyNA(dataOrig[, v, drop = FALSE]))) {
-    wasNAData <- is.na(dataOrig[, v, drop = FALSE])
+  if ((was_any_NA <- anyNA(data[, v, drop = FALSE]))) {
+    wasNAData <- is.na(data[, v, drop = FALSE])
   }
   if (verbose) {
     cat("\n  Variables to check:\t\t")
@@ -98,12 +96,17 @@ outRanger <- function(data, formula = . ~ .,
     if (verbose) {
       cat(vv, " ")
     }
-    fit <- ranger(formula = reformulate(setdiff(relevantVars[[2]], vv), response = vv), data = data)#, ...)
-    predData[[vv]] <- fit$predictions
+    covariables <- setdiff(relevantVars[[2]], vv)
+    if (length(covariables)) {
+      fit <- ranger(formula = reformulate(covariables, response = vv), data = data_rel)#, ...)
+      predData[[vv]] <- fit$predictions  
+    } else {
+      predData[[vv]] <- mean(data_rel[[vv]], na.rm = TRUE) 
+    }
   }
   
   # Calculate outlier scores and status
-  scores <- scale(outData - predData)
+  scores <- scale(data_rel[, v, drop = FALSE] - predData)
   if (was_any_NA) {
     scores[wasNAData] <- 0 
   }
@@ -115,12 +118,14 @@ outRanger <- function(data, formula = . ~ .,
     outlier <- abs(scores) >= sort(abs(scores[outlier]), decreasing = TRUE)[max_n_outlier]
   }
   
-  # Sparse representation of outliers and their scores
-  pos <- which(outlier, arr.ind = TRUE)
-  value_pos <- data.frame(pos)
-  value_pos[["col"]] <- v[value_pos[["col"]]]
-  value_pos[["score"]] <- scores[outlier]
-  value_pos[["value"]] <- dataOrig[, v][outlier]
+  # Collect info on outliers (one row per outlier)
+  info <- data.frame(which(outlier, arr.ind = TRUE))
+  info[["col"]] <- v[info[["col"]]]
+  info[["observed"]] <- data[, v][outlier]
+  info[["predicted"]] <- predData[outlier]
+  info[["scale_center"]] <- attributes(scores)$`scaled:center`[info[["col"]]] 
+  info[["scale_scale"]] <- attributes(scores)$`scaled:scale`[info[["col"]]] 
+  info[["score"]] <- scores[outlier]
   
   # Replace values
   if (replace != "no") {
@@ -129,18 +134,22 @@ outRanger <- function(data, formula = . ~ .,
         if (any(is_out <- outlier[, vv])) {
           nn <- knnx.index(predData[[vv]][!is_out], query = predData[[vv]][is_out], k = pmm.k)
           take <- t(rmultinom(sum(is_out), 1L, rep(1L, pmm.k)))
-          dataOrig[, vv][is_out] <- data[[vv]][!is_out][rowSums(nn * take)]
+          data[, vv][is_out] <- data_rel[[vv]][!is_out][rowSums(nn * take)]
         }
       } 
     } else {
-      dataOrig[, v][outlier] <- if (replace == "predictions") predData[outlier] else NA 
+      data[, v][outlier] <- if (replace == "predictions") predData[outlier] else NA 
     }
   }
+  info[["replacement"]] <- data[, v][outlier]
 
-  out <- list(data = dataOrig,
+  out <- list(data = data,
               v = v,
-              n_outliers = colSums(outlier),
-              value_pos = value_pos)
+#              scores = scores,
+#              predData = predData,
+#              outlier = outlier,
+              n_outliers = colSums(outlier, na.rm = TRUE),
+              info = info)
   class(out) <- c("outRanger", "list")
   
   if (verbose) {
