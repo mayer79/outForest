@@ -13,5 +13,5 @@
 summary.outRanger <- function(x, ...) {
   print(x)
   cat("\nDistribution of outliers:\n\n")
-  do.call(rbind, with(x$info, by(observed, INDICES = col, FUN = summary)))
+  do.call(rbind, with(outliers(x), by(observed, INDICES = col, FUN = summary)))
 }

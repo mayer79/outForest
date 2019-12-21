@@ -10,38 +10,39 @@
 #' @return \code{x} with outliers.
 #' @export
 #' @examples 
-#' generateOutlier(1:10, seed = 3345)
-#' generateOutlier(cbind(1:10, 10:1), p = 0.2)
-#' head(generateOutlier(iris))
-#' head(generateOutlier(iris, p = 0.2))
-#' head(generateOutlier(iris, p = c(0, 0, 0.5, 0.5, 0.5)))
-#' head(generateOutlier(iris, p = list(Sepal.Length = 0.2)))
+#' generateOutliers(1:10, seed = 334, p = 0.3)
+#' generateOutliers(cbind(1:10, 10:1), p = 0.2)
+#' head(generateOutliers(iris))
+#' head(generateOutliers(iris, p = 0.2))
+#' head(generateOutliers(iris, p = c(0, 0, 0.5, 0.5, 0.5)))
+#' head(generateOutliers(iris, p = list(Sepal.Length = 0.2)))
 #' @seealso \code{\link{outRanger}}.
-generateOutlier <- function(x, p = 0.05, sd_factor = 5, seed = NULL) {
+generateOutliers <- function(x, p = 0.05, sd_factor = 5, seed = NULL) {
   stopifnot(p >= 0, p <= 1, is.atomic(x) || is.data.frame(x))
   
   if (!is.null(seed)) {
     set.seed(seed)  
   }
   
-  generateOutlierVec <- function(z, p) {
+  generateOutliersVec <- function(z, p) {
     if (!is.numeric(z)) {
       return(z)
     }
     n <- length(z)
     m <- round(p * n)
-    z[sample(n, m)] <- z[m] + rnorm(m, sd_factor * sd(z, na.rm = TRUE))
+    z[sample(n, m)] <- z[m] + sample(c(-1, 1), m, replace = TRUE) * 
+      sd_factor * rnorm(m, sd(z, na.rm = TRUE))
     z
   }
   
   # vector or matrix
   if (is.atomic(x)) {
-    return(generateOutlierVec(x, p))
+    return(generateOutliersVec(x, p))
   } 
   
   # data frame
   v <- if (is.null(names(p))) names(x) else intersect(names(p), names(x))
-  x[, v] <- Map(generateOutlierVec, x[, v, drop = FALSE], p)
+  x[, v] <- Map(generateOutliersVec, x[, v, drop = FALSE], p)
   
   x
 }

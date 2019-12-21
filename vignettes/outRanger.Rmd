@@ -24,6 +24,8 @@ The aim of this vignette is to introduce the R package `outRanger` for multivari
 
 `outRanger` is a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is suspiciouly large (e.g. more than three times the RMSE of the out-of-bag predictions), then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers.
 
+The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The `outRanger` package estimates this conditional mean by a random forest.
+
 Since the random forest algorithm `ranger` [2] does not allow for missing values, any missing value is first being imputed by chained random forests, see [3]. 
 
 In the examples below, we will meet different functions from the `outRanger` package:
@@ -55,7 +57,7 @@ We first generate a data set with about 5% outliers per column and try to identi
 library(outRanger)
 
 # Generate data with outliers in numeric columns
-irisWithOutliers <- generateOutlier(iris, seed = 34)
+irisWithOutliers <- generateOutliers(iris, seed = 34)
 head(irisWithOutliers)
  
 # Find outliers by random forest regressions and replace them by predictive mean matching.
@@ -65,20 +67,18 @@ head(irisWithOutliers)
 plot(out)
 
 # Information on all outliers
-out$info
+outliers(out)
 
 # Resulting data set with replaced outliers
-head(out$data)
+head(Data(out))
 
 ```
 
 Note that `outRanger` offers a `...` argument to pass options to its workhorse random forest implementation `ranger`, e.g. `num.trees` or `min.node.size`. How would we use its "extra trees" variant with 50 trees?
 
 ``` {r}
-head(outRanger(irisWithOutliers, splitrule = "extratrees", num.trees = 50)$data)
+head(Data(outRanger(irisWithOutliers, splitrule = "extratrees", num.trees = 50)))
 ```
-
-It is as simple!
 
 Further note that `outRanger` does not rely on `tidyverse` but you can embed it into a `dplyr` pipeline (without `group_by`). Make sure to set `verbose = 0` in order to prevent messages flooding your screen.
 
@@ -88,15 +88,16 @@ require(dplyr)
 iris %>% 
   generateOutlier() %>% 
   outRanger(verbose = 0) %>%
+  Data() %>% 
   head()
   
 ```
 
-By default `outRanger` uses all columns in the data set to check all numeric columns with missings. To override this behaviour, you can use an intuitive formula interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
+By default `outRanger` uses all columns in the data set to check all numeric columns with missings. To override this behaviour, you can use its interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
 
-So if you e.g. want to check only variable `Sepal.Length`, then use this syntax.
+So if you e.g. want to check only variable `Sepal.Length` based on `Species`, then use this syntax.
 ``` {r}
-head(outRanger(irisWithOut, Sepal.Length ~ .))
+out <- outRanger(irisWithOut, Sepal.Length ~ Species)
 
 ```
 
@@ -106,19 +107,15 @@ head(outRanger(irisWithOut, Sepal.Length ~ .))
 
 Here are tweaks to make things faster:
 
-- Use less trees, e.g. by setting `num.trees = 50`. Even one single tree might be sufficient. Typically, the number of iterations until convergence will increase with fewer trees though.
+- Use less trees, e.g. by setting `num.trees = 50`. Typically, the number of iterations until convergence will increase with fewer trees though.
 
 - Use smaller number of variables to be considered in a split, e.g. `mtry = 2`.
 
 - Use smaller bootstrap samples by setting e.g. `sample.fraction = 0.1`.
 
-- Use the less greedy `splitrule = "extratrees"`.
-
 - Use a low tree depth `max.depth = 6`.
 
 - Use large leafs, e.g. `min.node.size = 10000`.
-
-- Use a low `max.iter`, e.g. 1 or 2.
 
 ## References
 

@@ -1,8 +1,8 @@
 #' Plot for outRanger
 #'
-#' This function can plot different aspects of an outRanger object. For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot. For \code{what = "scores"}, normalized outlier scores (i.e. the difference between predicted and observed value) are shown as scatter plot per variable.
+#' This function can plot aspects of an outRanger object. For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot. For \code{what = "scores"}, outlier scores (i.e. the scaled difference between predicted and observed value) are shown as scatter plot per variable.
 #'
-#' @importFrom graphics text barplot stripchart abline
+#' @importFrom graphics text barplot stripchart
 #' @method plot outRanger
 #' @param x An object of class \code{outRanger}.
 #' @param what What should be plotted? One of "counts" (the default) or "scores". 
@@ -10,7 +10,8 @@
 #' @return An object of class \code{ggplot2}.
 #' @export
 #' @examples
-#' x <- outRanger(iris, verbose = 0)
+#' irisWithOutliers <- generateOutliers(iris, seed = 345)
+#' x <- outRanger(irisWithOutliers, verbose = 0)
 #' plot(x)
 #' plot(x, what = "scores")
 #' @seealso \code{\link{light_performance}}.
@@ -21,7 +22,7 @@ plot.outRanger <- function(x, what = c("counts", "scores"), ...) {
     yy <- barplot(x$n_outliers, horiz = TRUE, yaxt = "n")
     text(0.1, yy, names(x$n_outliers), adj = 0)
   } else {
-    stripchart(score ~ col, data = x$info, vertical = TRUE, pch = 4, jitter = 0.05)
-    abline(h = 0, lty = 2)
+    stripchart(score ~ col, data = outliers(x), vertical = TRUE, 
+               pch = 4, jitter = 0.05, las = 2, cex.axis = 0.7)
   }
 }
