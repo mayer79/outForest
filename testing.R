@@ -5,7 +5,7 @@
 library(ranger)
 library(FNN)
 lapply(list.files("r", full.names = TRUE), source)
-out <- outRanger(ggplot2::diamonds, num.trees = 10)
+out <- outRanger(as.data.frame(ggplot2::diamonds), num.trees = 10, max_n_outliers = 10)
 outliers(out)
 head(Data(out))
 

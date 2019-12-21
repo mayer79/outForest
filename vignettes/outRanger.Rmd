@@ -80,7 +80,7 @@ Note that `outRanger` offers a `...` argument to pass options to its workhorse r
 head(Data(outRanger(irisWithOutliers, splitrule = "extratrees", num.trees = 50)))
 ```
 
-Further note that `outRanger` does not rely on `tidyverse` but you can embed it into a `dplyr` pipeline (without `group_by`). Make sure to set `verbose = 0` in order to prevent messages flooding your screen.
+Further note that `outRanger` does not rely on `tidyverse` but you can embed it into a `dplyr` pipeline (without `group_by`). Make sure to set `verbose = 0` in order to prevent messages flooding your screen. However, tibbles are not possible as input.
 
 ``` {r}
 require(dplyr)

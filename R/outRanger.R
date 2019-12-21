@@ -2,7 +2,7 @@
 #' 
 #' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than some predefined z-score (default is 3), then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm "ranger" [2] does not allow for missing values, any missing value is first being imputed by chained random forests. The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The 'outRanger' function estimates this conditional mean by a random forest.
 #' 
-#' @importFrom stats scale reformulate terms.formula predict
+#' @importFrom stats scale reformulate terms.formula predict var
 #' @importFrom ranger ranger
 #' @importFrom missRanger missRanger imputeUnivariate
 #' @importFrom stats rmultinom
@@ -77,7 +77,8 @@ outRanger <- function(data, formula = . ~ .,
   }
   
   # Pick numeric variables from lhs and determine variable names v to check
-  predData <- Filter(is.numeric, data_rel[, relevantVars[[1]], drop = FALSE])
+  predData <- Filter(function(z) is.numeric(z) && (var(z) > 0), 
+                     data_rel[, relevantVars[[1]], drop = FALSE])
   v <- colnames(predData)
   m <- length(v)
   if (m == 0L) {
@@ -103,7 +104,10 @@ outRanger <- function(data, formula = . ~ .,
     covariables <- setdiff(relevantVars[[2]], vv)
     if (length(covariables)) {
       fit <- ranger(formula = reformulate(covariables, response = vv), data = data_rel, ...)
-      predData[[vv]] <- fit$predictions  
+      predData[[vv]] <- fit$predictions
+      if (any(is_na <- is.na(predData[[vv]]))) {
+        predData[is_na, vv] <- predict(fit, data_rel[is_na, ])$predictions
+      }
     } else {
       predData[[vv]] <- mean(data_rel[[vv]], na.rm = TRUE) 
     }
@@ -112,9 +116,9 @@ outRanger <- function(data, formula = . ~ .,
   # Calculate outlier scores and status
   scores <- scale(data_rel[, v, drop = FALSE] - predData, center = FALSE)
   if (was_any_NA) {
-    scores[wasNAData] <- 0 
+    scores[wasNAData] <- 0
   }
-  is_outlier <- abs(scores) > z_score
+  is_outlier <- (abs(scores) > z_score)
   
   # Bound outlier count
   max_n_outliers <- min(max_n_outliers, max_prop_outliers * n * m)
