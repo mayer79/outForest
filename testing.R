@@ -9,13 +9,13 @@ out <- outRanger(as.data.frame(ggplot2::diamonds), num.trees = 10, max_n_outlier
 outliers(out)
 head(Data(out))
 
-# F) Time series data 
+# F) Time series data
 set.seed(3)
-t <- seq(0, 10, by = 0.1)
-y <- sin(t) + runif(length(t), 0, 0.1)
-y[50] <- 0
-plot(y ~ t)
-ch <- outRanger(data.frame(t, y))
+t <- seq(0, 10, by = 0.01)
+y <- sin(t) + runif(length(t), 0, 0.3)
+y[500] <- 0
+plot(y ~ t, type = "l")
+ch <- outRanger(data.frame(t, y), min.node.size = 40)
 outliers(ch)
 
 # G) Bathtube
@@ -26,4 +26,3 @@ dat[150, 2:3] <- c(0, 0.4)
 plot(y ~ x, data = dat, cex.lab = 1.3, cex.axis = 1.3)
 ch <- outRanger(dat[-1])
 outliers(ch)
-summary(ch, text = TRUE)
