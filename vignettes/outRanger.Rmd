@@ -26,11 +26,13 @@ The aim of this vignette is to introduce the R package `outRanger` for multivari
 
 The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The `outRanger` package estimates this conditional mean by a random forest.
 
-The outlier score of the $i$-th observed value $x_{ij}$ of variable $j$ is defined as 
+Specificly, the outlier score of the $i$-th observed value $x_{ij}$ of variable $j$ is defined as 
 $$
   s_{ij} = \frac{x_{ij} - \text{pred}_{ij}}{\text{rmse}_j},
 $$
 where $\text{pred}_{ij}$ is is the corresponding out-of-bag prediction of the j-th random forest with RMSE $\text{rmse}_j$. If $|s_{ij}| > L$ with threshold $L$, then $x_{ij}$ is considered an outlier.
+
+Why using random forests for calculating the conditional means? They often work well without parameter tuning, outliers in the input variables are no issue and the out-of-bag mechanism helps to provide fair outlier scores.
 
 `outRanger` utilizes the high-performance random forest implementation `ranger` [2]. Since it does not allow for missing values, any missing value is first being imputed by chained random forests, see [3]. 
 
@@ -59,7 +61,7 @@ install_github("mayer79/outRanger")
 
 ## Examples
 
-We first generate a data set with two truely multivariate outliers.
+We first generate a data set with two truely multivariate outliers. Then, we use `outRanger` to hunt them down.
 
 ``` {r}
 library(outRanger)
@@ -69,6 +71,7 @@ set.seed(3)
 t <- seq(0, pi, by = 0.01)
 dat <- data.frame(x = cos(t), y = sin(t) + runif(length(t), -0.1, 0.1))
 dat[c(100, 200), ] <- cbind(c(-0.5, 0.5), c(0.4, 0.4))
+
 plot(y ~ x, data = dat)
 
 # Let's run outRanger on that data
@@ -119,6 +122,8 @@ irisWithOutliers %>%
   
 ```
 
+## The formula interface
+
 By default `outRanger` uses all columns in the data set to check all numeric columns with missings. To override this behaviour, you can use its formula interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
 
 So if you e.g. want to check only variable `Sepal.Length` based on `Species`, then use this syntax.
@@ -132,10 +137,26 @@ summary(out)
 
 ## Too many values are identified as outliers. Crap!
 
-For large data sets, just by chance, many values can surpass the default threshold of 3. To reduce the number of outliers, the threshold can be increased. Alternatively, the number of outliers can be limited by the two arguments `max_n_outliers` and `max_prop_outliers`. E.g. if at most three outliers are to be identified, set `max_n_outliers = 3`:
+For large data sets, just by chance, many values can surpass the default threshold of 3. To reduce the number of outliers, the threshold can be increased. Alternatively, the number of outliers can be limited by the two arguments `max_n_outliers` and `max_prop_outliers`. E.g. if at most three outliers are to be identified, set `max_n_outliers = 3`. If at most 1% of the values are to be declared as outliers, set `max_prop_outliers = 0.01`.
 
 ```{r}
 outliers(outRanger(irisWithOutliers, max_n_outliers = 3))
+```
+
+## I don't want outliers to be replaced!
+
+By default `outRanger` replaces outliers by predictive mean matching on the out-of-bag predictions. Alternatively, you can set the `replace` argument to a different value:
+
+- "no": Outliers are not replaced.
+
+- "predicted": Outliers are replaced by the out-of-bag predictions (without predictive mean matching).
+
+- "NA": Outliers are replaced by missing values.
+
+So if you would like to replace outliers by NAs, write:
+``` {r}
+out <- outRanger(irisWithOutliers, replace = "NA")
+head(Data(out))
 ```
 
 ## The algorithm takes too much time. What can I do?
@@ -144,7 +165,7 @@ outliers(outRanger(irisWithOutliers, max_n_outliers = 3))
 
 Here are tweaks to make things faster:
 
-- Use less trees, e.g. by setting `num.trees = 50`. Don't use a too low value to prevent out-of-bag predictions to be missing.
+- Use less trees, e.g. by setting `num.trees = 50`. Don't use a too low value because this can lead to missing out-of-bag predictions.
 
 - Use smaller number of variables to be considered in a split, e.g. `mtry = 2`.
 

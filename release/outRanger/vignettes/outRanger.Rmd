@@ -26,17 +26,25 @@ The aim of this vignette is to introduce the R package `outRanger` for multivari
 
 The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The `outRanger` package estimates this conditional mean by a random forest.
 
-Since the random forest algorithm `ranger` [2] does not allow for missing values, any missing value is first being imputed by chained random forests, see [3]. 
+Specificly, the outlier score of the $i$-th observed value $x_{ij}$ of variable $j$ is defined as 
+$$
+  s_{ij} = \frac{x_{ij} - \text{pred}_{ij}}{\text{rmse}_j},
+$$
+where $\text{pred}_{ij}$ is is the corresponding out-of-bag prediction of the j-th random forest with RMSE $\text{rmse}_j$. If $|s_{ij}| > L$ with threshold $L$, then $x_{ij}$ is considered an outlier.
+
+Why using random forests for calculating the conditional means? They often work well without parameter tuning, outliers in the input variables are no issue and the out-of-bag mechanism helps to provide fair outlier scores.
+
+`outRanger` utilizes the high-performance random forest implementation `ranger` [2]. Since it does not allow for missing values, any missing value is first being imputed by chained random forests, see [3]. 
 
 In the examples below, we will meet different functions from the `outRanger` package:
 
-- `generateOutliers`: To add nasty outliers to a data set.
-
-- `outRanger`: To identify and replace outliers in numeric variables of a data frame.
+- `outRanger`: This is the main function. It identifies and replaces outliers in numeric variables of a data frame.
 
 - `print`, `summary` and `plot`: To inspect outlier information.
 
-- `outliers` and `Data`: To extract information on outliers and the modified data.
+- `outliers` and `Data`: To extract information on outliers and the data with replaced outliers.
+
+- `generateOutliers`: To add nasty outliers to a data set.
 
 ## Installation
 
@@ -53,54 +61,102 @@ install_github("mayer79/outRanger")
 
 ## Examples
 
-We first generate a data set with about 5% outliers per column and try to identify with `outRanger`.
+We first generate a data set with two truely multivariate outliers. Then, we use `outRanger` to hunt them down.
 
 ``` {r}
 library(outRanger)
 
-# Generate data with outliers in numeric columns
-irisWithOutliers <- generateOutliers(iris, seed = 34)
-head(irisWithOutliers)
- 
-# Find outliers by random forest regressions and replace them by predictive mean matching.
-(out <- outRanger(irisWithOutliers))
+# Create data set with truely multivariate outlier
+set.seed(3)
+t <- seq(0, pi, by = 0.01)
+dat <- data.frame(x = cos(t), y = sin(t) + runif(length(t), -0.1, 0.1))
+dat[c(100, 200), ] <- cbind(c(-0.5, 0.5), c(0.4, 0.4))
 
-# Plot the number of outliers per numeric variable
-plot(out)
+plot(y ~ x, data = dat)
 
-# Information on all outliers
-outliers(out)
+# Let's run outRanger on that data
+ch <- outRanger(dat)
 
-# Resulting data set with replaced outliers
-head(Data(out))
+# What outliers did we find?
+outliers(ch)
 
+# Bingo! How does the fixed data set looks like?
+plot(y ~ x, data = Data(ch))
+
+# The number of outliers per variable
+plot(ch)
 ```
 
-Note that `outRanger` offers a `...` argument to pass options to its workhorse random forest implementation `ranger`, e.g. `num.trees` or `min.node.size`. How would we use its "extra trees" variant with 50 trees?
+Note that `outRanger` offers a `...` argument to pass options to its workhorse random forest implementation `ranger`, e.g. `num.trees` or `mtry`. How would we use its "extra trees" variant with 50 trees? As data set, we add a couple of outliers to the famous iris flower data set.
 
 ``` {r}
-head(Data(outRanger(irisWithOutliers, splitrule = "extratrees", num.trees = 50)))
+irisWithOutliers <- generateOutliers(iris)
+out <- outRanger(irisWithOutliers, splitrule = "extratrees", num.trees = 50)
+
+# The worst outliers
+head(outliers(out))
+
+# Summary of outliers
+summary(out)
+
+# Basic plot of the number of outliers per variable
+plot(out)
+
+# Basic plot of the scores of the outliers per variable
+plot(out, what = "scores")
+
+# Sum
+summary(out)
+head(Data(out))
 ```
 
-Further note that `outRanger` does not rely on `tidyverse` but you can embed it into a `dplyr` pipeline (without `group_by`). Make sure to set `verbose = 0` in order to prevent messages flooding your screen. However, tibbles are not possible as input.
+Further note that `outRanger` does not rely on `tidyverse` but you can embed it into a `dplyr` pipeline (without `group_by`). Make sure to set `verbose = 0` in order to prevent messages flooding your screen.
 
 ``` {r}
 library(dplyr)
 
-iris %>% 
-  generateOutliers() %>% 
+irisWithOutliers %>% 
   outRanger(verbose = 0) %>%
   Data() %>% 
   head()
   
 ```
 
-By default `outRanger` uses all columns in the data set to check all numeric columns with missings. To override this behaviour, you can use its interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
+## The formula interface
+
+By default `outRanger` uses all columns in the data set to check all numeric columns with missings. To override this behaviour, you can use its formula interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
 
 So if you e.g. want to check only variable `Sepal.Length` based on `Species`, then use this syntax.
 ``` {r}
 out <- outRanger(irisWithOutliers, Sepal.Length ~ Species)
 
+# Summary
+summary(out)
+
+```
+
+## Too many values are identified as outliers. Crap!
+
+For large data sets, just by chance, many values can surpass the default threshold of 3. To reduce the number of outliers, the threshold can be increased. Alternatively, the number of outliers can be limited by the two arguments `max_n_outliers` and `max_prop_outliers`. E.g. if at most three outliers are to be identified, set `max_n_outliers = 3`. If at most 1% of the values are to be declared as outliers, set `max_prop_outliers = 0.01`.
+
+```{r}
+outliers(outRanger(irisWithOutliers, max_n_outliers = 3))
+```
+
+## I don't want outliers to be replaced!
+
+By default `outRanger` replaces outliers by predictive mean matching on the out-of-bag predictions. Alternatively, you can set the `replace` argument to a different value:
+
+- "no": Outliers are not replaced.
+
+- "predicted": Outliers are replaced by the out-of-bag predictions (without predictive mean matching).
+
+- "NA": Outliers are replaced by missing values.
+
+So if you would like to replace outliers by NAs, write:
+``` {r}
+out <- outRanger(irisWithOutliers, replace = "NA")
+head(Data(out))
 ```
 
 ## The algorithm takes too much time. What can I do?
@@ -109,7 +165,7 @@ out <- outRanger(irisWithOutliers, Sepal.Length ~ Species)
 
 Here are tweaks to make things faster:
 
-- Use less trees, e.g. by setting `num.trees = 50`. Typically, the number of iterations until convergence will increase with fewer trees though.
+- Use less trees, e.g. by setting `num.trees = 50`. Don't use a too low value because this can lead to missing out-of-bag predictions.
 
 - Use smaller number of variables to be considered in a split, e.g. `mtry = 2`.
 

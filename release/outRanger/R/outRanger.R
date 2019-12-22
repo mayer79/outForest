@@ -1,6 +1,9 @@
 #' Multivariate Outlier Detection and Replacement by Random Forest Predictions
 #'
-#' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than some predefined z-score (default is 3), then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm "ranger" [2] does not allow for missing values, any missing value is first being imputed by chained random forests. The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The 'outRanger' function estimates this conditional mean by a random forest.
+#' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than some predefined threshold (default is 3), then a value is considered an outlier, see Details below. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm "ranger" [2] does not allow for missing values, any missing value is first being imputed by chained random forests. The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The 'outRanger' function estimates this conditional mean by a random forest.
+#'
+#' The outlier score of the i-th value x_ij of the j-th variable is defined as s_ij = (x_ij - pred_ij) / rmse_j, where pred_ij is the corresponding out-of-bag prediction of the j-th random forest and rmse_j its RMSE. If |s_ij| > L with threshold L, then x_ij is considered an outlier.
+#' For large data sets, just by chance, many values can surpass the default threshold of 3. To reduce the number of outliers, the threshold can be increased. Alternatively, the number of outliers can be limited by the two arguments \code{max_n_outliers} and \code{max_prop_outliers}. E.g. if at most ten outliers are to be identified, set \code{max_n_outliers = 10}.
 #'
 #' @importFrom stats reformulate terms.formula as.formula predict var
 #' @importFrom ranger ranger
@@ -10,15 +13,15 @@
 #' @param data A \code{data.frame} to be assessed for numeric outliers.
 #' @param formula A two-sided formula specifying variables to be checked (left hand side) and variables used to check (right hand side). Defaults to . ~ ., i.e. use all variables to check all (numeric) variables.
 #' @param replace Should outliers be replaced by predicting mean matching on the OOB predictions ("pmm", the default), by OOB predictions ("predictions"), by \code{NA} ("NA"). Use "no" to keep outliers as they are.
-#' @param pmm.k For \code{replace = "pmm"}, how many nearest neighbours (without outliers) be considered to sample values from?
-#' @param z_score Z score used to identify outliers. The default is 3.
-#' @param max_n_outliers Maximal number of outliers to identify. Will be used in combination with \code{z_score} and \code{max_prop_outliers}.
-#' @param max_prop_outliers Maximal relative count of outliers. Will be used in combination with \code{z_score} and \code{max_n_outliers}.
-#' @param summary If TRUE (default), different attributes are added to the output.
+#' @param pmm.k For \code{replace = "pmm"}, how many nearest prediction neighbours (without outliers) be considered to sample observed values from?
+#' @param threshold Threshold above which an outlier score is considered an outlier. The default is 3.
+#' @param max_n_outliers Maximal number of outliers to identify. Will be used in combination with \code{threshold} and \code{max_prop_outliers}.
+#' @param max_prop_outliers Maximal relative count of outliers. Will be used in combination with \code{threshold} and \code{max_n_outliers}.
+#' @param min.node.size Minimal node size of the random forests. With 40, the value is relatively high. This reduces the impact of outliers.
 #' @param impute_multivariate If \code{TRUE} (default), missing values are imputed by \code{missRanger::missRanger}. Otherwise, by univariate sampling.
 #' @param impute_multivariate_control Parameters passed to \code{missRanger::missRanger} if data contains missing values.
 #' @param seed Integer random seed.
-#' @param verbose Controls how much outliers is printed to screen. 0 to print nothing, 1 prints outliersrmation.
+#' @param verbose Controls how much outliers is printed to screen. 0 to print nothing, 1 prints information.
 #' @param ... Arguments passed to \code{ranger}. If the data set is large, use less trees (e.g. \code{num.trees = 20}) and/or a low value of \code{mtry}.
 #' The following arguments are e.g. incompatible with \code{ranger}: \code{write.forest}, \code{probability}, \code{dependent.variable.name}, and \code{classification}.
 #' @return An object of type \code{outRanger} (and a list). The data set with replaced values can be extracted by calling \code{Data}. A description of all outliers detected can be found by calling \code{outliers}.
@@ -36,19 +39,24 @@
 #' @seealso \code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outRanger}}, \code{\link{summary.outRanger}}.
 outRanger <- function(data, formula = . ~ .,
                       replace = c("pmm", "predictions", "NA", "no"), pmm.k = 3,
-                      z_score = 3, max_n_outliers = Inf, max_prop_outliers = 1, summary = TRUE,
+                      threshold = 3, max_n_outliers = Inf, max_prop_outliers = 1,
+                      min.node.size = 40,
                       impute_multivariate = TRUE,
                       impute_multivariate_control = list(pmm.k = 3, num.trees = 20, maxiter = 2L),
                       seed = NULL, verbose = 1, ...) {
   replace <- match.arg(replace)
+  data <- as.data.frame(data)
 
   # Initial check
-  stopifnot(is.data.frame(data),
-            (n <- nrow(data)) >= 1L,
+  stopifnot((n <- nrow(data)) >= 1L,
             inherits(formula, "formula"),
             length(formula <- as.character(formula)) == 3L,
             !(c("write.forest", "probability", "dependent.variable.name",
                 "classification") %in% names(list(...))))
+  if (min.node.size > n / 3) {
+    min.node.size <- ceiling(n / 3)
+    message("Due to small sample size, reduced 'min.node.size' to ", min.node.size)
+  }
 
   if (!is.null(seed)) {
     set.seed(seed)
@@ -103,7 +111,8 @@ outRanger <- function(data, formula = . ~ .,
     }
     covariables <- setdiff(relevantVars[[2]], vv)
     if (length(covariables)) {
-      fit <- ranger(formula = reformulate(covariables, response = vv), data = data_rel, ...)
+      fit <- ranger(formula = reformulate(covariables, response = vv),
+                    data = data_rel, min.node.size = min.node.size, ...)
       predData[[vv]] <- fit$predictions
       if (any(is_na <- is.na(predData[[vv]]))) {
         predData[is_na, vv] <- predict(fit, data_rel[is_na, ])$predictions
@@ -118,7 +127,7 @@ outRanger <- function(data, formula = . ~ .,
   if (was_any_NA) {
     scores[wasNAData] <- 0
   }
-  is_outlier <- (abs(scores) > z_score)
+  is_outlier <- (abs(scores) > threshold)
 
   # Bound outlier count
   max_n_outliers <- min(max_n_outliers, max_prop_outliers * n * m)
@@ -133,6 +142,7 @@ outRanger <- function(data, formula = . ~ .,
   outliers[["predicted"]] <- predData[is_outlier]
   outliers[["rmse"]] <- attributes(scores)$`scaled:scale`[outliers[["col"]]]
   outliers[["score"]] <- scores[is_outlier]
+  outliers[["threshold"]] <- threshold
 
   # Replace values
   if (replace != "no") {
@@ -149,6 +159,7 @@ outRanger <- function(data, formula = . ~ .,
     }
   }
   outliers[["replacement"]] <- data[, v][is_outlier]
+  outliers <- outliers[order(abs(outliers$score), decreasing = TRUE), , drop = FALSE]
 
   out <- list(Data = data,
               v = v,
