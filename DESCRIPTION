@@ -19,7 +19,7 @@ Description: Provides a random forest based implementation of
     of the corresponding random forest regression is suspiciously large
     (e.g. three times the RMSE of the random forest), then a value is
     considered an outlier. Our package offers different options to replace
-    such outliers, e.g. by realistic values found via preditive mean
+    such outliers, e.g. by realistic values found via predictive mean
     matching. The method can be viewed as a multivariate extension of a
     basic univariate outlier detection method where a value is considered
     an outlier if it is more than e.g. three times the standard deviation

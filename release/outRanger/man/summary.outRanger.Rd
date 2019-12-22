@@ -18,6 +18,6 @@ A list of summary statistics.
 Summary method for an object of class \code{outRanger}. Besides the number of outliers per variables, it shows univariate distributions of the values considered as outliers.
 }
 \examples{
-object <- outRanger(iris, seed = 34, verbose = 0)
-summary(object)
+out <- outRanger(iris, seed = 34, verbose = 0)
+summary(out)
 }

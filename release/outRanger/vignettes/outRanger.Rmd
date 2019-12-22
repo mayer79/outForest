@@ -132,7 +132,14 @@ out <- outRanger(irisWithOutliers, Sepal.Length ~ Species)
 
 # Summary
 summary(out)
+```
 
+If you want to prevent `outRanger` to identify and replace outliers in the response variable of a subsequent model, `Sepal.Length` say, subtract that variable from the left hand side.
+``` {r}
+out <- outRanger(irisWithOutliers, . - Sepal.Length ~ .)
+
+# Summary
+summary(out)
 ```
 
 ## Too many values are identified as outliers. Crap!

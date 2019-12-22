@@ -50,7 +50,7 @@ outRanger <- function(data, formula = . ~ .,
   # Initial check
   stopifnot((n <- nrow(data)) >= 1L,
             inherits(formula, "formula"),
-            length(formula <- as.character(formula)) == 3L,
+            length(formula <- as.character.default(formula)) == 3L,
             !(c("write.forest", "probability", "dependent.variable.name",
                 "classification") %in% names(list(...))))
   if (min.node.size > n / 3) {
@@ -90,7 +90,7 @@ outRanger <- function(data, formula = . ~ .,
   v <- colnames(predData)
   m <- length(v)
   if (m == 0L) {
-    return(data)
+    stop("Nothing to check.")
   }
   # Keep missingness outliers in original data
   if ((was_any_NA <- anyNA(data[, v, drop = FALSE]))) {
@@ -129,43 +129,48 @@ outRanger <- function(data, formula = . ~ .,
   }
   is_outlier <- (abs(scores) > threshold)
 
-  # Bound outlier count
-  max_n_outliers <- min(max_n_outliers, max_prop_outliers * n * m)
-  if (sum(is_outlier) > max_n_outliers) {
-    is_outlier <- abs(scores) >= sort(abs(scores[is_outlier]), decreasing = TRUE)[max_n_outliers]
-  }
-
-  # Collect outliers on outliers (one row per outlier)
-  outliers <- data.frame(which(is_outlier, arr.ind = TRUE))
-  outliers[["col"]] <- factor(v[outliers[["col"]]], levels = v)
-  outliers[["observed"]] <- data[, v][is_outlier]
-  outliers[["predicted"]] <- predData[is_outlier]
-  outliers[["rmse"]] <- attributes(scores)$`scaled:scale`[outliers[["col"]]]
-  outliers[["score"]] <- scores[is_outlier]
-  outliers[["threshold"]] <- threshold
-
-  # Replace values
-  if (replace != "no") {
-    if (replace == "pmm") {
-      for (vv in v) { # v <- "Sepal.Length"
-        if (any(is_out <- is_outlier[, vv])) {
-          nn <- knnx.index(predData[[vv]][!is_out], query = predData[[vv]][is_out], k = pmm.k)
-          take <- t(rmultinom(sum(is_out), 1L, rep(1L, pmm.k)))
-          data[, vv][is_out] <- data_rel[[vv]][!is_out][rowSums(nn * take)]
-        }
-      }
-    } else {
-      data[, v][is_outlier] <- if (replace == "predictions") predData[is_outlier] else NA
+  if (any(is_outlier)) {
+    # Bound outlier count
+    max_n_outliers <- min(max_n_outliers, max_prop_outliers * n * m)
+    if (sum(is_outlier) > max_n_outliers) {
+      is_outlier <- abs(scores) >= sort(abs(scores[is_outlier]), decreasing = TRUE)[max_n_outliers]
     }
+
+    # Collect outliers on outliers (one row per outlier)
+    outliers <- data.frame(which(is_outlier, arr.ind = TRUE))
+    outliers[["col"]] <- factor(v[outliers[["col"]]], levels = v)
+    outliers[["observed"]] <- data[, v][is_outlier]
+    outliers[["predicted"]] <- predData[is_outlier]
+    outliers[["rmse"]] <- attributes(scores)$`scaled:scale`[outliers[["col"]]]
+    outliers[["score"]] <- scores[is_outlier]
+    outliers[["threshold"]] <- threshold
+
+    # Replace values
+    if (replace != "no") {
+      if (replace == "pmm") {
+        for (vv in v) { # v <- "Sepal.Length"
+          if (any(is_out <- is_outlier[, vv])) {
+            nn <- knnx.index(predData[[vv]][!is_out], query = predData[[vv]][is_out], k = pmm.k)
+            take <- t(rmultinom(sum(is_out), 1L, rep(1L, pmm.k)))
+            data[, vv][is_out] <- data_rel[[vv]][!is_out][rowSums(nn * take)]
+          }
+        }
+      } else {
+        data[, v][is_outlier] <- if (replace == "predictions") predData[is_outlier] else NA
+      }
+    }
+    outliers[["replacement"]] <- data[, v][is_outlier]
+    outliers <- outliers[order(abs(outliers$score), decreasing = TRUE), , drop = FALSE]
+  } else {
+    # Create empty outliers data.frame
+    outliers <- data.frame(row = integer(), col = factor(character(), levels = v))
+    nc <- c("observed", "predicted", "rmse", "score", "threshold", "replacement")
+    outliers <- cbind(outliers, matrix(NA_real_, ncol = length(nc),
+                                       nrow = 0, dimnames = list(NULL, nc)))
   }
-  outliers[["replacement"]] <- data[, v][is_outlier]
-  outliers <- outliers[order(abs(outliers$score), decreasing = TRUE), , drop = FALSE]
 
   out <- list(Data = data,
               v = v,
-#              scores = scores,
-#              predData = predData,
-#              is_outlier = is_outlier,
               n_outliers = colSums(is_outlier, na.rm = TRUE),
               outliers = outliers)
   class(out) <- c("outRanger", "list")

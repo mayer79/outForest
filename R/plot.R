@@ -22,6 +22,9 @@ plot.outRanger <- function(x, what = c("counts", "scores"), ...) {
                   main = "Number of outliers per variable", xlab = "Count", ...)
     text(0.1, yy, names(x$n_outliers), adj = 0)
   } else {
+    if (nrow(outliers(x)) == 0L) {
+      stop("No outlier to plot")
+    }
     stripchart(score ~ col, data = outliers(x), vertical = TRUE,
                pch = 4, las = 2, cex.axis = 0.7, ...)
     abline(h = c(-1, 1) * outliers(x)$threshold[1], lty = 2)

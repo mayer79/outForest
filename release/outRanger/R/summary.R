@@ -8,10 +8,12 @@
 #' @method summary outRanger
 #' @export
 #' @examples
-#' object <- outRanger(iris, seed = 34, verbose = 0)
-#' summary(object)
+#' out <- outRanger(iris, seed = 34, verbose = 0)
+#' summary(out)
 summary.outRanger <- function(object, ...) {
   print(object)
-  cat("\nDistribution of outliers:\n\n")
-  do.call(rbind, with(outliers(object), by(observed, INDICES = col, FUN = summary)))
+  if (nrow(outliers(object))) {
+    cat("\nDistribution of outliers:\n\n")
+    do.call(rbind, with(outliers(object), by(observed, INDICES = col, FUN = summary)))
+  }
 }
