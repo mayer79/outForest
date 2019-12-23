@@ -1,0 +1,47 @@
+Type: Package
+Package: outForest
+Title: Multivariate Outlier Detection and Replacement by Random
+    Forest Predictions
+Version: 0.1.0
+Date: 2019-12-23
+Authors@R: 
+    person(given = "Michael",
+           family = "Mayer",
+           role = c("aut", "cre", "cph"),
+           email = "mayermichael79@gmail.com")
+Maintainer: Michael Mayer <mayermichael79@gmail.com>
+Description: Provides a random forest based implementation of
+    the method described in Chapter 7.1.2 ('Regression Model Based Anomaly
+    detection') of Chandola et al. (2009)
+    <dx.doi.org/10.1145/1541880.1541882>. It works as follows: Each
+    numeric variable is regressed onto all other variables. If the scaled
+    absolute difference between observed value and out-of-bag prediction
+    of the corresponding random forest regression is suspiciously large
+    (e.g. three times the RMSE of the random forest), then a value is
+    considered an outlier. Our package offers different options to replace
+    such outliers, e.g. by realistic values found via predictive mean
+    matching. The method can be viewed as a multivariate extension of a
+    basic univariate outlier detection method where a value is considered
+    an outlier if it is more than e.g. three times the standard deviation
+    away from its mean. In the multivariate case, instead of comparing a
+    value with the overall mean, rather the difference to the conditional
+    mean is considered. The 'outForest' package estimates this conditional
+    mean by a random forest. Once the method is trained on a reference
+    data, it can be applied to new data.
+License: GPL(>= 2)
+Depends: 
+    R (>= 3.5.0)
+VignetteBuilder: 
+    knitr
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    stats,
+    graphics,
+    FNN,
+    ranger,
+    missRanger (>= 2.1.0)
+Suggests: 
+    dplyr,
+    knitr
+RoxygenNote: 7.0.2
