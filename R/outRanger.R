@@ -1,6 +1,6 @@
 #' Multivariate Outlier Detection and Replacement by Random Forest Predictions
 #'
-#' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than some predefined threshold (default is 3), then a value is considered an outlier, see Details below. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm "ranger" [2] does not allow for missing values, any missing value is first being imputed by chained random forests. The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The 'outRanger' function estimates this conditional mean by a random forest.
+#' This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than some predefined threshold (default is 3), then a value is considered an outlier, see Details below. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm "ranger" [2] does not allow for missing values, any missing value is first being imputed by chained random forests. The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The 'outForest' function estimates this conditional mean by a random forest.
 #'
 #' The outlier score of the i-th value x_ij of the j-th variable is defined as s_ij = (x_ij - pred_ij) / rmse_j, where pred_ij is the corresponding out-of-bag prediction of the j-th random forest and rmse_j its RMSE. If |s_ij| > L with threshold L, then x_ij is considered an outlier.
 #' For large data sets, just by chance, many values can surpass the default threshold of 3. To reduce the number of outliers, the threshold can be increased. Alternatively, the number of outliers can be limited by the two arguments \code{max_n_outliers} and \code{max_prop_outliers}. E.g. if at most ten outliers are to be identified, set \code{max_n_outliers = 10}.
@@ -16,14 +16,14 @@
 #' @param max_n_outliers Maximal number of outliers to identify. Will be used in combination with \code{threshold} and \code{max_prop_outliers}.
 #' @param max_prop_outliers Maximal relative count of outliers. Will be used in combination with \code{threshold} and \code{max_n_outliers}.
 #' @param min.node.size Minimal node size of the random forests. With 40, the value is relatively high. This reduces the impact of outliers.
-#' @param allow_predictions Should the resulting outRanger be used on new data? Default is \code{FALSE} as fitted random forests can be huge.
+#' @param allow_predictions Should the resulting outForest be used on new data? Default is \code{FALSE} as fitted random forests can be huge.
 #' @param impute_multivariate If \code{TRUE} (default), missing values are imputed by \code{missRanger::missRanger}. Otherwise, by univariate sampling.
 #' @param impute_multivariate_control Parameters passed to \code{missRanger::missRanger} if data contains missing values.
 #' @param seed Integer random seed.
 #' @param verbose Controls how much outliers is printed to screen. 0 to print nothing, 1 prints information.
 #' @param ... Arguments passed to \code{ranger}. If the data set is large, use less trees (e.g. \code{num.trees = 20}) and/or a low value of \code{mtry}.
 #' The following arguments are e.g. incompatible with \code{ranger}: \code{write.forest}, \code{probability}, \code{dependent.variable.name}, and \code{classification}.
-#' @return An object of type \code{outRanger} and a list with the following elements.
+#' @return An object of type \code{outForest} and a list with the following elements.
 #' \itemize{
 #'   \item \code{Data} Original data set in unchanged row order but optionally with outliers replaced. Can be extracted with the \code{Data} function.
 #'   \item \code{outliers} Compact representation of outliers, for details see the \code{outliers} function used to extract them.
@@ -45,13 +45,13 @@
 #' @export
 #' @examples
 #' head(irisWithOut <- generateOutliers(iris, seed = 345))
-#' (out <- outRanger(irisWithOut))
+#' (out <- outForest(irisWithOut))
 #' outliers(out)
 #' head(Data(out))
 #' plot(out)
 #' plot(out, what = "scores")
-#' @seealso \code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outRanger}}, \code{\link{summary.outRanger}}, \code{\link{predict.outRanger}}.
-outRanger <- function(data, formula = . ~ .,
+#' @seealso \code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outForest}}, \code{\link{summary.outForest}}, \code{\link{predict.outForest}}.
+outForest <- function(data, formula = . ~ .,
                       replace = c("pmm", "predictions", "NA", "no"), pmm.k = 3,
                       threshold = 3, max_n_outliers = Inf, max_prop_outliers = 1,
                       min.node.size = 40, allow_predictions = FALSE,
@@ -163,7 +163,7 @@ outRanger <- function(data, formula = . ~ .,
     forests = if (allow_predictions) forests,
     used_to_check = relevantVars[[2]],
     mu = mu))
-  class(out) <- c("outRanger", "list")
+  class(out) <- c("outForest", "list")
   out
 }
 

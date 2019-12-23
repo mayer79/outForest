@@ -1,8 +1,8 @@
-#' outliers of outRanger
+#' outliers of outForest
 #'
-#' Extracts outliers from object of class \code{outRanger}. The outliers are sorted by there absolute score in descending fashion.
+#' Extracts outliers from object of class \code{outForest}. The outliers are sorted by there absolute score in descending fashion.
 #'
-#' @param object An object of class \code{outRanger}.
+#' @param object An object of class \code{outForest}.
 #' @param ... Arguments passed from or to other methods.
 #' @return A \code{data.frame} with one row per outlier. The columns are as follows:
 #' \itemize{
@@ -16,7 +16,7 @@
 #' }
 #' @export
 #' @examples
-#' x <- outRanger(iris)
+#' x <- outForest(iris)
 #' outliers(x)
 outliers <- function(object, ...) {
   UseMethod("outliers")
@@ -28,8 +28,8 @@ outliers.default <- function(object, ...) {
   stop("No default method available yet.")
 }
 
-#' @describeIn outliers Extract outliers from outRanger object.
+#' @describeIn outliers Extract outliers from outForest object.
 #' @export
-outliers.outRanger <- function(object, ...) {
+outliers.outForest <- function(object, ...) {
   object$outliers
 }

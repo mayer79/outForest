@@ -1,13 +1,13 @@
-#' Data of outRanger
+#' Data of outForest
 #'
-#' Extracts data with replaced outliers from object of class \code{outRanger}.
+#' Extracts data with replaced outliers from object of class \code{outForest}.
 #'
-#' @param object An object of class \code{outRanger}.
+#' @param object An object of class \code{outForest}.
 #' @param ... Arguments passed from or to other methods.
 #' @return A \code{data.frame}.
 #' @export
 #' @examples
-#' x <- outRanger(iris)
+#' x <- outForest(iris)
 #' head(Data(x))
 Data <- function(object, ...) {
   UseMethod("Data")
@@ -19,8 +19,8 @@ Data.default <- function(object, ...) {
   stop("No default method available yet.")
 }
 
-#' @describeIn Data Extract data from outRanger object.
+#' @describeIn Data Extract data from outForest object.
 #' @export
-Data.outRanger <- function(object, ...) {
+Data.outForest <- function(object, ...) {
   object$Data
 }

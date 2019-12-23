@@ -15,7 +15,7 @@
 #' @param max_n_outliers max_n_outliers.
 #' @param max_prop_outliers max_prop_outliers.
 #' @param allow_predictions allow_predictions.
-#' @param obj outRanger object.
+#' @param obj outForest object.
 #' @return A list.
 process_scores <- function(data, scores, predData, v, rmse, replace, pmm.k, threshold,
                            max_n_outliers, max_prop_outliers, allow_predictions, obj = NULL) {

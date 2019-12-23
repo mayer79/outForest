@@ -1,9 +1,9 @@
 #' Out-of-Sample Application
 #'
-#' Identify outliers in new data set based on previously fitted "outRanger" object. The result of \code{predict} is again an object of type "outRanger". All its methods can be applied to it.
+#' Identify outliers in new data set based on previously fitted "outForest" object. The result of \code{predict} is again an object of type "outForest". All its methods can be applied to it.
 #'
 #' @importFrom stats predict
-#' @param object An object of class "outRanger".
+#' @param object An object of class "outForest".
 #' @param newdata A new \code{data.frame} to be assessed for numeric outliers.
 #' @param replace Should outliers be replaced by predicting mean matching (from the original non-outliers) on the predictions ("pmm", the default), by predictions ("predictions"), by \code{NA} ("NA"). Use "no" to keep outliers as they are.
 #' @param pmm.k For \code{replace = "pmm"}, how many nearest prediction neighbours (from the original non-outliers) be considered to sample observed values from?
@@ -12,11 +12,11 @@
 #' @param max_prop_outliers Maximal relative count of outliers. Will be used in combination with \code{threshold} and \code{max_n_outliers}.
 #' @param seed Integer random seed.
 #' @param ... Further arguments passed from other methods.
-#' @return An object of type \code{outRanger}.
+#' @return An object of type \code{outForest}.
 #' @export
-#' @method predict outRanger
+#' @method predict outForest
 #' @examples
-#' (out <- outRanger(iris, allow_predictions = TRUE))
+#' (out <- outForest(iris, allow_predictions = TRUE))
 #' iris1 <- iris[1, ]
 #' iris1$Sepal.Length <- -1
 #' pred <- predict(out, newdata = iris1)
@@ -24,8 +24,8 @@
 #' Data(pred)
 #' plot(pred)
 #' plot(pred, what = "scores")
-#' @seealso \code{\link{outRanger}}, \code{\link{outliers}}, \code{\link{Data}}.
-predict.outRanger <- function(object, newdata, replace = c("pmm", "predictions", "NA", "no"),
+#' @seealso \code{\link{outForest}}, \code{\link{outliers}}, \code{\link{Data}}.
+predict.outForest <- function(object, newdata, replace = c("pmm", "predictions", "NA", "no"),
                               pmm.k = 3, threshold = object$threshold, max_n_outliers = Inf,
                               max_prop_outliers = 1, seed = NULL, ...) {
   replace <- match.arg(replace)
@@ -35,7 +35,7 @@ predict.outRanger <- function(object, newdata, replace = c("pmm", "predictions",
   stopifnot(is.data.frame(newdata),
             (n <- nrow(newdata)) >= 1L)
   if (!object$allow_predictions) {
-    stop("Use 'allow_predictions = TRUE' when creating 'outRanger' object.")
+    stop("Use 'allow_predictions = TRUE' when creating 'outForest' object.")
   }
 
   # Initialization
@@ -76,7 +76,7 @@ predict.outRanger <- function(object, newdata, replace = c("pmm", "predictions",
                         max_prop_outliers = max_prop_outliers,
                         allow_predictions = FALSE, obj = object)
   out <- c(out, list(forests = NULL), object[c("used_to_check", "mu")])
-  class(out) <- c("outRanger", "list")
+  class(out) <- c("outForest", "list")
   out
 }
 

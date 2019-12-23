@@ -1,19 +1,23 @@
-#' Summarizes outRanger
+#' Summarizes outForest
 #'
-#' Summary method for an object of class \code{outRanger}. Besides the number of outliers per variables, it shows univariate distributions of the values considered as outliers.
+#' Summary method for an object of class \code{outForest}. Besides the number of outliers per variables, it shows the worst outliers.
 #'
-#' @param object A on object of class \code{outRanger}.
+#' @param object A on object of class \code{outForest}.
 #' @param ... Further arguments passed from other methods.
 #' @return A list of summary statistics.
-#' @method summary outRanger
+#' @method summary outForest
 #' @export
 #' @examples
-#' out <- outRanger(iris, seed = 34, verbose = 0)
+#' out <- outForest(iris, seed = 34, verbose = 0)
 #' summary(out)
-summary.outRanger <- function(object, ...) {
-  print(object)
-  if (nrow(outliers(object))) {
-    cat("\nDistribution of outliers:\n\n")
-    do.call(rbind, with(outliers(object), by(observed, INDICES = col, FUN = summary)))
+summary.outForest <- function(object, ...) {
+   if (nrow(outliers(object)) == 0L) {
+    cat("Congratulations, no outliers found.")
+  } else {
+    cat("The following outlier counts have been detected:\n\n")
+    print(cbind(`Number of outliers` = object$n_outliers))
+
+    cat("\nThese are the worst outliers:\n\n")
+    print(head(outliers(object)))
   }
 }
