@@ -1,5 +1,5 @@
 Type: Package
-Package: outRanger
+Package: outForest
 Title: Multivariate Outlier Detection and Replacement by Random
     Forest Predictions
 Version: 0.1.0
@@ -25,7 +25,7 @@ Description: Provides a random forest based implementation of
     an outlier if it is more than e.g. three times the standard deviation
     away from its mean. In the multivariate case, instead of comparing a
     value with the overall mean, rather the difference to the conditional
-    mean is considered. The 'outRanger' package estimates this conditional
+    mean is considered. The 'outForest' package estimates this conditional
     mean by a random forest. Once the method is trained on a reference
     data, it can be applied to new data.
 License: GPL(>= 2)
