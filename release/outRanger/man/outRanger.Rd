@@ -13,6 +13,7 @@ outRanger(
   max_n_outliers = Inf,
   max_prop_outliers = 1,
   min.node.size = 40,
+  allow_predictions = FALSE,
   impute_multivariate = TRUE,
   impute_multivariate_control = list(pmm.k = 3, num.trees = 20, maxiter = 2L),
   seed = NULL,
@@ -37,6 +38,8 @@ outRanger(
 
 \item{min.node.size}{Minimal node size of the random forests. With 40, the value is relatively high. This reduces the impact of outliers.}
 
+\item{allow_predictions}{Should the resulting outRanger be used on new data? Default is \code{FALSE} as fitted random forests can be huge.}
+
 \item{impute_multivariate}{If \code{TRUE} (default), missing values are imputed by \code{missRanger::missRanger}. Otherwise, by univariate sampling.}
 
 \item{impute_multivariate_control}{Parameters passed to \code{missRanger::missRanger} if data contains missing values.}
@@ -49,7 +52,21 @@ outRanger(
 The following arguments are e.g. incompatible with \code{ranger}: \code{write.forest}, \code{probability}, \code{dependent.variable.name}, and \code{classification}.}
 }
 \value{
-An object of type \code{outRanger} (and a list). The data set with replaced values can be extracted by calling \code{Data}. A description of all outliers detected can be found by calling \code{outliers}.
+An object of type \code{outRanger} and a list with the following elements.
+\itemize{
+  \item \code{Data} Original data set in unchanged row order but optionally with outliers replaced. Can be extracted with the \code{Data} function.
+  \item \code{outliers} Compact representation of outliers, for details see the \code{outliers} function used to extract them.
+  \item \code{n_outliers} Number of outliers per \code{v}.
+  \item \code{is_outlier} Logical matrix with outlier status. NULL if \code{allow_predictions = FALSE}.
+  \item \code{predData} \code{data.frame} with OOB predictions. NULL if \code{allow_predictions = FALSE}.
+  \item \code{allow_predictions} Same as \code{allow_predictions}.
+  \item \code{v} Variables checked.
+  \item \code{threshold} The threshold used.
+  \item \code{rmse} Named vector of RMSE of the random forests. Used for scaling the difference between observed values and predicted.
+  \item \code{forests} Named list of fitted random forests. NULL if \code{allow_predictions = FALSE}.
+  \item \code{used_to_check} Variables used for checking \code{v}.
+  \item \code{mu} Named vector of sample means of the original v (incl. outliers).
+}
 }
 \description{
 This function provides a random forest based implementation of the method described in Chapter 7.1.2 ("Regression Model Based Anomaly detection") of [1]. Each numeric variable to be checked for outliers is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than some predefined threshold (default is 3), then a value is considered an outlier, see Details below. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers. Since the random forest algorithm "ranger" [2] does not allow for missing values, any missing value is first being imputed by chained random forests. The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The 'outRanger' function estimates this conditional mean by a random forest.
@@ -71,5 +88,5 @@ plot(out, what = "scores")
 [2] Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. <arxiv.org/abs/1508.04409>.
 }
 \seealso{
-\code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outRanger}}, \code{\link{summary.outRanger}}.
+\code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outRanger}}, \code{\link{summary.outRanger}}, \code{\link{predict.outRanger}}.
 }

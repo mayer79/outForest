@@ -8,8 +8,6 @@
 #' @importFrom stats reformulate terms.formula as.formula predict var
 #' @importFrom ranger ranger
 #' @importFrom missRanger missRanger imputeUnivariate
-#' @importFrom stats rmultinom
-#' @importFrom FNN knnx.index
 #' @param data A \code{data.frame} to be assessed for numeric outliers.
 #' @param formula A two-sided formula specifying variables to be checked (left hand side) and variables used to check (right hand side). Defaults to . ~ ., i.e. use all variables to check all (numeric) variables.
 #' @param replace Should outliers be replaced by predicting mean matching on the OOB predictions ("pmm", the default), by OOB predictions ("predictions"), by \code{NA} ("NA"). Use "no" to keep outliers as they are.
@@ -18,13 +16,29 @@
 #' @param max_n_outliers Maximal number of outliers to identify. Will be used in combination with \code{threshold} and \code{max_prop_outliers}.
 #' @param max_prop_outliers Maximal relative count of outliers. Will be used in combination with \code{threshold} and \code{max_n_outliers}.
 #' @param min.node.size Minimal node size of the random forests. With 40, the value is relatively high. This reduces the impact of outliers.
+#' @param allow_predictions Should the resulting outRanger be used on new data? Default is \code{FALSE} as fitted random forests can be huge.
 #' @param impute_multivariate If \code{TRUE} (default), missing values are imputed by \code{missRanger::missRanger}. Otherwise, by univariate sampling.
 #' @param impute_multivariate_control Parameters passed to \code{missRanger::missRanger} if data contains missing values.
 #' @param seed Integer random seed.
 #' @param verbose Controls how much outliers is printed to screen. 0 to print nothing, 1 prints information.
 #' @param ... Arguments passed to \code{ranger}. If the data set is large, use less trees (e.g. \code{num.trees = 20}) and/or a low value of \code{mtry}.
 #' The following arguments are e.g. incompatible with \code{ranger}: \code{write.forest}, \code{probability}, \code{dependent.variable.name}, and \code{classification}.
-#' @return An object of type \code{outRanger} (and a list). The data set with replaced values can be extracted by calling \code{Data}. A description of all outliers detected can be found by calling \code{outliers}.
+#' @return An object of type \code{outRanger} and a list with the following elements.
+#' \itemize{
+#'   \item \code{Data} Original data set in unchanged row order but optionally with outliers replaced. Can be extracted with the \code{Data} function.
+#'   \item \code{outliers} Compact representation of outliers, for details see the \code{outliers} function used to extract them.
+#'   \item \code{n_outliers} Number of outliers per \code{v}.
+#'   \item \code{is_outlier} Logical matrix with outlier status. NULL if \code{allow_predictions = FALSE}.
+#'   \item \code{predData} \code{data.frame} with OOB predictions. NULL if \code{allow_predictions = FALSE}.
+#'   \item \code{allow_predictions} Same as \code{allow_predictions}.
+#'   \item \code{v} Variables checked.
+#'   \item \code{threshold} The threshold used.
+#'   \item \code{rmse} Named vector of RMSE of the random forests. Used for scaling the difference between observed values and predicted.
+#'   \item \code{forests} Named list of fitted random forests. NULL if \code{allow_predictions = FALSE}.
+#'   \item \code{used_to_check} Variables used for checking \code{v}.
+#'   \item \code{mu} Named vector of sample means of the original v (incl. outliers).
+#' }
+#'
 #' @references
 #' [1] Chandola V., Banerjee A., and Kumar V. (2009). Anomaly detection: A survey. ACM Comput. Surv. 41, 3, Article 15 <dx.doi.org/10.1145/1541880.1541882>.
 #' [2] Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. <arxiv.org/abs/1508.04409>.
@@ -36,11 +50,11 @@
 #' head(Data(out))
 #' plot(out)
 #' plot(out, what = "scores")
-#' @seealso \code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outRanger}}, \code{\link{summary.outRanger}}.
+#' @seealso \code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outRanger}}, \code{\link{summary.outRanger}}, \code{\link{predict.outRanger}}.
 outRanger <- function(data, formula = . ~ .,
                       replace = c("pmm", "predictions", "NA", "no"), pmm.k = 3,
                       threshold = 3, max_n_outliers = Inf, max_prop_outliers = 1,
-                      min.node.size = 40,
+                      min.node.size = 40, allow_predictions = FALSE,
                       impute_multivariate = TRUE,
                       impute_multivariate_control = list(pmm.k = 3, num.trees = 20, maxiter = 2L),
                       seed = NULL, verbose = 1, ...) {
@@ -68,15 +82,15 @@ outRanger <- function(data, formula = . ~ .,
 
   # Fill missing values
   all_relevant <- unique(unlist(relevantVars))
-  data_rel <- data[, all_relevant, drop = FALSE]
-  if (anyNA(data_rel)) {
+  data_imp <- data[, all_relevant, drop = FALSE]
+  if (anyNA(data_imp)) {
     if (impute_multivariate) {
       ff <- paste(all_relevant, collapse = "+")
-      missRanger_args <- c(list(data = data_rel, formula = as.formula(paste(ff, ff, sep = "~")),
+      missRanger_args <- c(list(data = data_imp, formula = as.formula(paste(ff, ff, sep = "~")),
                                 verbose = verbose), impute_multivariate_control)
-      data_rel <- do.call(missRanger, missRanger_args)
+      data_imp <- do.call(missRanger, missRanger_args)
     } else {
-      data_rel <- imputeUnivariate(data_rel)
+      data_imp <- imputeUnivariate(data_imp)
     }
   }
 
@@ -86,16 +100,26 @@ outRanger <- function(data, formula = . ~ .,
 
   # Pick numeric variables from lhs and determine variable names v to check
   predData <- Filter(function(z) is.numeric(z) && (var(z) > 0),
-                     data_rel[, relevantVars[[1]], drop = FALSE])
+                     data_imp[, relevantVars[[1]], drop = FALSE])
   v <- colnames(predData)
   m <- length(v)
   if (m == 0L) {
     stop("Nothing to check.")
   }
+  # Vector with means (incl. outliers, excl. NAs)
+  mu <- colMeans(data[, v, drop = FALSE], na.rm = TRUE)
+
   # Keep missingness outliers in original data
   if ((was_any_NA <- anyNA(data[, v, drop = FALSE]))) {
     wasNAData <- is.na(data[, v, drop = FALSE])
   }
+  # Initialize forests
+  if (allow_predictions) {
+    forests <- vector(mode = "list", length = m)
+    names(forests) <- v
+  }
+
+  # Check each variable
   if (verbose) {
     cat("\n  Variables to check:\t\t")
     cat(v, sep = ", ")
@@ -103,82 +127,43 @@ outRanger <- function(data, formula = . ~ .,
     cat(relevantVars[[2]], sep = ", ")
     cat("\n\n  Checking: ")
   }
-
-  # Check each variable
-  for (vv in v) { # 1 <- 1
+  for (vv in v) {
     if (verbose) {
       cat(vv, " ")
     }
     covariables <- setdiff(relevantVars[[2]], vv)
     if (length(covariables)) {
       fit <- ranger(formula = reformulate(covariables, response = vv),
-                    data = data_rel, min.node.size = min.node.size, ...)
+                    data = data_imp, min.node.size = min.node.size, ...)
       predData[[vv]] <- fit$predictions
       if (any(is_na <- is.na(predData[[vv]]))) {
-        predData[is_na, vv] <- predict(fit, data_rel[is_na, ])$predictions
+        predData[is_na, vv] <- predict(fit, data_imp[is_na, ])$predictions
+      }
+      if (allow_predictions) {
+        forests[[vv]] <- fit
       }
     } else {
-      predData[[vv]] <- mean(data_rel[[vv]], na.rm = TRUE)
+      # If no covariables, then prediction is simply the mean (including outliers)
+      predData[[vv]] <- mu[vv]
     }
   }
 
   # Calculate outlier scores and status
-  scores <- scale(data_rel[, v, drop = FALSE] - predData, center = FALSE)
+  scores <- scale(data_imp[, v, drop = FALSE] - predData, center = FALSE)
+  rmse <- attributes(scores)$`scaled:scale`
   if (was_any_NA) {
     scores[wasNAData] <- 0
   }
-  is_outlier <- (abs(scores) > threshold)
-
-  if (any(is_outlier)) {
-    # Bound outlier count
-    max_n_outliers <- min(max_n_outliers, max_prop_outliers * n * m)
-    if (sum(is_outlier) > max_n_outliers) {
-      is_outlier <- abs(scores) >= sort(abs(scores[is_outlier]), decreasing = TRUE)[max_n_outliers]
-    }
-
-    # Collect outliers on outliers (one row per outlier)
-    outliers <- data.frame(which(is_outlier, arr.ind = TRUE))
-    outliers[["col"]] <- factor(v[outliers[["col"]]], levels = v)
-    outliers[["observed"]] <- data[, v][is_outlier]
-    outliers[["predicted"]] <- predData[is_outlier]
-    outliers[["rmse"]] <- attributes(scores)$`scaled:scale`[outliers[["col"]]]
-    outliers[["score"]] <- scores[is_outlier]
-    outliers[["threshold"]] <- threshold
-
-    # Replace values
-    if (replace != "no") {
-      if (replace == "pmm") {
-        for (vv in v) { # v <- "Sepal.Length"
-          if (any(is_out <- is_outlier[, vv])) {
-            nn <- knnx.index(predData[[vv]][!is_out], query = predData[[vv]][is_out], k = pmm.k)
-            take <- t(rmultinom(sum(is_out), 1L, rep(1L, pmm.k)))
-            data[, vv][is_out] <- data_rel[[vv]][!is_out][rowSums(nn * take)]
-          }
-        }
-      } else {
-        data[, v][is_outlier] <- if (replace == "predictions") predData[is_outlier] else NA
-      }
-    }
-    outliers[["replacement"]] <- data[, v][is_outlier]
-    outliers <- outliers[order(abs(outliers$score), decreasing = TRUE), , drop = FALSE]
-  } else {
-    # Create empty outliers data.frame
-    outliers <- data.frame(row = integer(), col = factor(character(), levels = v))
-    nc <- c("observed", "predicted", "rmse", "score", "threshold", "replacement")
-    outliers <- cbind(outliers, matrix(NA_real_, ncol = length(nc),
-                                       nrow = 0, dimnames = list(NULL, nc)))
-  }
-
-  out <- list(Data = data,
-              v = v,
-              n_outliers = colSums(is_outlier, na.rm = TRUE),
-              outliers = outliers)
+  out <- process_scores(data = data, scores = scores, predData = predData,
+                        v = v, rmse = rmse, replace = replace, pmm.k = pmm.k,
+                        threshold = threshold, max_n_outliers = max_n_outliers,
+                        max_prop_outliers = max_prop_outliers,
+                        allow_predictions = allow_predictions)
+  out <- c(out, list(
+    forests = if (allow_predictions) forests,
+    used_to_check = relevantVars[[2]],
+    mu = mu))
   class(out) <- c("outRanger", "list")
-
-  if (verbose) {
-    cat("\n")
-  }
-
   out
 }
 

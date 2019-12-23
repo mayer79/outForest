@@ -28,7 +28,7 @@ irisWithOutliers <- generateOutliers(iris, seed = 34)
 head(irisWithOutliers)
  
 # Find outliers by random forest regressions and replace them by predictive mean matching
-(out <- outRanger(irisWithOutliers))
+(out <- outRanger(irisWithOutliers, allow_predictions = TRUE))
 
 # Plot the number of outliers per numeric variable
 plot(out)
@@ -39,4 +39,10 @@ outliers(out)
 # Resulting data set with replaced outliers
 head(Data(out))
 
+# Out-of-sample application
+iris1 <- iris[1, ]
+iris1$Sepal.Length <- -1
+pred <- predict(out, newdata = iris1)
+outliers(pred)
+Data(pred)
 ```

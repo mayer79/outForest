@@ -122,6 +122,19 @@ irisWithOutliers %>%
   
 ```
 
+## Out-of-sample application
+
+Once an `outRanger` object is fitted with option `allow_predictions`, it can be used to find and replace outliers in new data without refitting. Note that random forests can be huge, so use this option with care.
+
+``` {r}
+(out <- outRanger(iris, allow_predictions = TRUE))
+iris1 <- iris[1:2, ]
+iris1$Sepal.Length[1] <- -1
+pred <- predict(out, newdata = iris1)
+outliers(pred)
+Data(pred)
+```
+
 ## The formula interface
 
 By default `outRanger` uses all columns in the data set to check all numeric columns with missings. To override this behaviour, you can use its formula interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
