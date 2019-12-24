@@ -4,7 +4,7 @@
 \alias{outliers}
 \alias{outliers.default}
 \alias{outliers.outForest}
-\title{outliers of outForest}
+\title{Extracts Outliers}
 \usage{
 outliers(object, ...)
 
@@ -13,24 +13,24 @@ outliers(object, ...)
 \method{outliers}{outForest}(object, ...)
 }
 \arguments{
-\item{object}{An object of class \code{outForest}.}
+\item{object}{An object of class 'outForest'.}
 
 \item{...}{Arguments passed from or to other methods.}
 }
 \value{
 A \code{data.frame} with one row per outlier. The columns are as follows:
 \itemize{
-  \item \code{row}, \code{col} Row and column in original data with outlier.
-  \item \code{observed} Observed value.
-  \item \code{predicted} Predicted value.
-  \item \code{rmse} Scaling factor used to normalize the difference between observed and predicted.
-  \item \code{score} Outlier score defined as (observed-predicted)/rmse.
-  \item \code{threshold} Threshold above which an outlier score counts as outlier.
-  \item \code{replacement} Value used to replace observed value.
+  \item \code{row}, \code{col}: Row and column in original data with outlier.
+  \item \code{observed}: Observed value.
+  \item \code{predicted}: Predicted value.
+  \item \code{rmse}: Scaling factor used to normalize the difference between observed and predicted.
+  \item \code{score}: Outlier score defined as (observed-predicted)/rmse.
+  \item \code{threshold}: Threshold above which an outlier score counts as outlier.
+  \item \code{replacement}: Value used to replace observed value.
 }
 }
 \description{
-Extracts outliers from object of class \code{outForest}. The outliers are sorted by there absolute score in descending fashion.
+Extracts outliers from object of class 'outForest'. The outliers are sorted by their absolute score in descending fashion.
 }
 \section{Methods (by class)}{
 \itemize{

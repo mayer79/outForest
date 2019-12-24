@@ -1,8 +1,8 @@
-#' Data of outForest
+#' Extracts Data
 #'
-#' Extracts data with replaced outliers from object of class \code{outForest}.
+#' Extracts data with optionally replaced outliers from object of class 'outForest'.
 #'
-#' @param object An object of class \code{outForest}.
+#' @param object An object of class 'outForest'.
 #' @param ... Arguments passed from or to other methods.
 #' @return A \code{data.frame}.
 #' @export

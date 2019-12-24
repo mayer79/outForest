@@ -1,6 +1,6 @@
 #' Plot for outForest
 #'
-#' This function can plot aspects of an outForest object. For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot. For \code{what = "scores"}, outlier scores (i.e. the scaled difference between predicted and observed value) are shown as scatter plot per variable.
+#' This function can plot aspects of an 'outForest' object. For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot. For \code{what = "scores"}, outlier scores (i.e. the scaled difference between predicted and observed value) are shown as scatter plot per variable.
 #'
 #' @importFrom graphics text barplot stripchart abline
 #' @method plot outForest

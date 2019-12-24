@@ -15,7 +15,7 @@
 #' head(generateOutliers(iris))
 #' head(generateOutliers(iris, p = 0.2))
 #' head(generateOutliers(iris, p = c(0, 0, 0.5, 0.5, 0.5)))
-#' head(generateOutliers(iris, p = list(Sepal.Length = 0.2)))
+#' head(generateOutliers(iris, p = c(Sepal.Length = 0.2)))
 #' @seealso \code{\link{outForest}}.
 generateOutliers <- function(x, p = 0.05, sd_factor = 5, seed = NULL) {
   stopifnot(p >= 0, p <= 1, is.atomic(x) || is.data.frame(x))

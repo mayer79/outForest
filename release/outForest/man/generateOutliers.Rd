@@ -27,7 +27,7 @@ generateOutliers(cbind(1:10, 10:1), p = 0.2)
 head(generateOutliers(iris))
 head(generateOutliers(iris, p = 0.2))
 head(generateOutliers(iris, p = c(0, 0, 0.5, 0.5, 0.5)))
-head(generateOutliers(iris, p = list(Sepal.Length = 0.2)))
+head(generateOutliers(iris, p = c(Sepal.Length = 0.2)))
 }
 \seealso{
 \code{\link{outForest}}.

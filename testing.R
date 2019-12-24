@@ -2,6 +2,7 @@
 #  TESTING THE PACKAGE "outForest"
 #=====================================================================================
 
+# library(outForest)
 library(ranger)
 library(missRanger)
 library(FNN)
@@ -9,6 +10,13 @@ lapply(list.files("r", full.names = TRUE), source)
 out <- outForest(as.data.frame(ggplot2::diamonds), num.trees = 10, max_n_outliers = 10)
 outliers(out)
 head(Data(out))
+
+out <- outForest(CO2, allow_predictions = TRUE)
+summary(out)
+head(CO2)
+X <- head(CO2)
+X[1, "uptake"] = 40
+outliers(predict(out, X))
 
 # F) Time series data
 set.seed(3)

@@ -1,6 +1,6 @@
 #' Out-of-Sample Application
 #'
-#' Identify outliers in new data set based on previously fitted "outForest" object. The result of \code{predict} is again an object of type "outForest". All its methods can be applied to it.
+#' Identify outliers in new data set based on previously fitted 'outForest' object. The result of \code{predict} is again an object of type 'outForest'. All its methods can be applied to it.
 #'
 #' @importFrom stats predict
 #' @param object An object of class "outForest".

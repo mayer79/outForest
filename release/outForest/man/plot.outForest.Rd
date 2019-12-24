@@ -17,7 +17,7 @@
 An object of class \code{ggplot2}.
 }
 \description{
-This function can plot aspects of an outForest object. For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot. For \code{what = "scores"}, outlier scores (i.e. the scaled difference between predicted and observed value) are shown as scatter plot per variable.
+This function can plot aspects of an 'outForest' object. For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot. For \code{what = "scores"}, outlier scores (i.e. the scaled difference between predicted and observed value) are shown as scatter plot per variable.
 }
 \examples{
 irisWithOutliers <- generateOutliers(iris, seed = 345)

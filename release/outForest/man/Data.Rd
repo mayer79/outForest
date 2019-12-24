@@ -4,7 +4,7 @@
 \alias{Data}
 \alias{Data.default}
 \alias{Data.outForest}
-\title{Data of outForest}
+\title{Extracts Data}
 \usage{
 Data(object, ...)
 
@@ -13,7 +13,7 @@ Data(object, ...)
 \method{Data}{outForest}(object, ...)
 }
 \arguments{
-\item{object}{An object of class \code{outForest}.}
+\item{object}{An object of class 'outForest'.}
 
 \item{...}{Arguments passed from or to other methods.}
 }
@@ -21,7 +21,7 @@ Data(object, ...)
 A \code{data.frame}.
 }
 \description{
-Extracts data with replaced outliers from object of class \code{outForest}.
+Extracts data with optionally replaced outliers from object of class 'outForest'.
 }
 \section{Methods (by class)}{
 \itemize{

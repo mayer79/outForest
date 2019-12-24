@@ -2,7 +2,7 @@
 % Please edit documentation in R/is.R
 \name{is.outForest}
 \alias{is.outForest}
-\title{Check function}
+\title{Type Check}
 \usage{
 is.outForest(x)
 }
@@ -13,7 +13,7 @@ is.outForest(x)
 A logical vector of length one.
 }
 \description{
-Checks if an object inherits class \code{outForest}.
+Checks if an object inherits class 'outForest'.
 }
 \examples{
 a <- outForest(iris)

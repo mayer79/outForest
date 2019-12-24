@@ -1,6 +1,6 @@
-#' Check function
+#' Type Check
 #'
-#' Checks if an object inherits class \code{outForest}.
+#' Checks if an object inherits class 'outForest'.
 #'
 #' @param x Any object.
 #' @return A logical vector of length one.

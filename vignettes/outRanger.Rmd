@@ -1,5 +1,5 @@
 ---
-title: "Using outForest"
+title: "Using 'outForest'"
 author: "Michael Mayer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -92,8 +92,9 @@ plot(ch)
 Note that `outForest` offers a `...` argument to pass options to its workhorse random forest implementation `ranger`, e.g. `num.trees` or `mtry`. How would we use its "extra trees" variant with 50 trees? As data set, we add a couple of outliers to the famous iris flower data set.
 
 ``` {r}
-irisWithOutliers <- generateOutliers(iris)
-out <- outForest(irisWithOutliers, splitrule = "extratrees", num.trees = 50)
+head(irisWithOutliers <- generateOutliers(iris, p = 0.02))
+out <- outForest(irisWithOutliers, splitrule = "extratrees", 
+                 num.trees = 50, verbose = 0)
 
 # The worst outliers
 head(outliers(out))
@@ -107,8 +108,7 @@ plot(out)
 # Basic plot of the scores of the outliers per variable
 plot(out, what = "scores")
 
-# Sum
-summary(out)
+# The fixed data
 head(Data(out))
 ```
 
@@ -129,7 +129,7 @@ irisWithOutliers %>%
 Once an `outForest` object is fitted with option `allow_predictions = TRUE`, it can be used to find and replace outliers in new data without refitting. Note that random forests can be huge, so use this option with care. Further note that currently, missing values in the new data are only allowed in one single variable to be checked.
 
 ``` {r}
-(out <- outForest(iris, allow_predictions = TRUE))
+out <- outForest(iris, allow_predictions = TRUE, verbose = 0)
 iris1 <- iris[1:2, ]
 iris1$Sepal.Length[1] <- -1
 pred <- predict(out, newdata = iris1)
@@ -143,17 +143,13 @@ By default `outForest` uses all columns in the data set to check all numeric col
 
 So if you e.g. want to check only variable `Sepal.Length` based on `Species`, then use this syntax.
 ``` {r}
-out <- outForest(irisWithOutliers, Sepal.Length ~ Species)
-
-# Summary
+out <- outForest(irisWithOutliers, Sepal.Length ~ Species, verbose = 0)
 summary(out)
 ```
 
 If you want to prevent `outForest` to identify and replace outliers in the response variable of a subsequent model, `Sepal.Length` say, subtract that variable from the left hand side.
 ``` {r}
-out <- outForest(irisWithOutliers, . - Sepal.Length ~ .)
-
-# Summary
+out <- outForest(irisWithOutliers, . - Sepal.Length ~ ., verbose = 0)
 summary(out)
 ```
 
@@ -162,7 +158,7 @@ summary(out)
 For large data sets, just by chance, many values can surpass the default threshold of 3. To reduce the number of outliers, the threshold can be increased. Alternatively, the number of outliers can be limited by the two arguments `max_n_outliers` and `max_prop_outliers`. E.g. if at most three outliers are to be identified, set `max_n_outliers = 3`. If at most 1% of the values are to be declared as outliers, set `max_prop_outliers = 0.01`.
 
 ```{r}
-outliers(outForest(irisWithOutliers, max_n_outliers = 3))
+outliers(outForest(irisWithOutliers, max_n_outliers = 3, verbose = 0))
 ```
 
 ## I don't want outliers to be replaced!
@@ -177,7 +173,7 @@ By default `outForest` replaces outliers by predictive mean matching on the out-
 
 So if you would like to replace outliers by NAs, write:
 ``` {r}
-out <- outForest(irisWithOutliers, replace = "NA")
+out <- outForest(irisWithOutliers, replace = "NA", verbose = 0)
 head(Data(out))
 ```
 
