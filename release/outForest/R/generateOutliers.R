@@ -19,30 +19,27 @@
 #' @seealso \code{\link{outForest}}.
 generateOutliers <- function(x, p = 0.05, sd_factor = 5, seed = NULL) {
   stopifnot(p >= 0, p <= 1, is.atomic(x) || is.data.frame(x))
-
   if (!is.null(seed)) {
     set.seed(seed)
   }
-
-  generateOutliersVec <- function(z, p) {
-    if (!is.numeric(z)) {
-      return(z)
-    }
-    n <- length(z)
-    m <- round(p * n)
-    z[sample(n, m)] <- z[m] + sample(c(-1, 1), m, replace = TRUE) *
-      sd_factor * rnorm(m, sd(z, na.rm = TRUE))
-    z
-  }
-
   # vector or matrix
   if (is.atomic(x)) {
-    return(generateOutliersVec(x, p))
+    return(.generateOutliersVec(z = x, p = p, sdf = sd_factor))
   }
-
   # data frame
   v <- if (is.null(names(p))) names(x) else intersect(names(p), names(x))
-  x[, v] <- Map(generateOutliersVec, x[, v, drop = FALSE], p)
-
+  x[, v] <- Map(.generateOutliersVec, z = x[, v, drop = FALSE], p = p, sdf = sd_factor)
   x
+}
+
+# Helper function
+.generateOutliersVec <- function(z, p, sdf) {
+  if (!is.numeric(z)) {
+    return(z)
+  }
+  n <- length(z)
+  m <- round(p * n)
+  z[sample(n, m)] <- z[m] + sample(c(-1, 1), m, replace = TRUE) *
+    sdf * rnorm(m, sd(z, na.rm = TRUE))
+  z
 }
