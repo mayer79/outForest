@@ -82,7 +82,8 @@ outForest <- function(data, formula = . ~ .,
   all_relevant <- unique(unlist(relevantVars))
   if (!all(all_relevant == make.names(all_relevant))) {
     stop("Currently, non-syntactic column names are not supported in the core of 'outRanger'.
-         You can rename them or drop them by writing something like '. - `bad name` ~ . - `bad name`'.")
+         You can rename them or drop them via formula interface by writing something like
+         '. - `bad name` ~ . - `bad name`'.")
   }
   data_imp <- data[, all_relevant, drop = FALSE]
   if (anyNA(data_imp)) {
