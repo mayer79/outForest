@@ -74,15 +74,12 @@ outForest <- function(data, formula = . ~ .,
     set.seed(seed)
   }
 
-  # Extract lhs and rhs from formula
-  relevantVars <- lapply(formula[2:3], function(z) attr(terms.formula(
-    reformulate(z), data = data[1, ]), "term.labels"))
+  # Extract lhs and rhs from formula (not trivial due to the ".")
+  relevantVars <- lapply(formula[2:3], function(z) colnames(model.frame(
+    reformulate(z), data = data[1, ])))
 
   # Fill missing values
   all_relevant <- unique(unlist(relevantVars))
-  if (!all(all_relevant == make.names(all_relevant))) {
-    stop("Currently, non-syntactic column names are not supported.")
-  }
   data_imp <- data[, all_relevant, drop = FALSE]
   if (anyNA(data_imp)) {
     if (impute_multivariate) {
@@ -132,10 +129,9 @@ outForest <- function(data, formula = . ~ .,
     if (verbose) {
       cat(vv, " ")
     }
-    covariables <- setdiff(relevantVars[[2]], vv)
-    if (length(covariables)) {
-      fit <- ranger(formula = reformulate(covariables, response = vv),
-                    data = data_imp, min.node.size = min.node.size, ...)
+    if (length(setdiff(relevantVars[[2]], vv))) {
+      fit <- ranger(data = data_imp, dependent.variable.name = vv,
+                    min.node.size = min.node.size, ...)
       predData[[vv]] <- fit$predictions
       if (any(is_na <- is.na(predData[[vv]]))) {
         predData[is_na, vv] <- predict(fit, data_imp[is_na, ])$predictions
@@ -167,7 +163,5 @@ outForest <- function(data, formula = . ~ .,
   class(out) <- c("outForest", "list")
   out
 }
-
-
 
 
