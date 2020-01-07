@@ -68,3 +68,4 @@ hd
 pred <- predict(ch, hd)
 summary(pred)
 Data(pred)
+

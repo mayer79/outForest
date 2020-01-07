@@ -3,7 +3,7 @@ Package: outForest
 Title: Multivariate Outlier Detection and Replacement by Random
     Forest Predictions
 Version: 0.1.0
-Date: 2019-12-26
+Date: 2020-01-07
 Authors@R: 
     person(given = "Michael",
            family = "Mayer",
