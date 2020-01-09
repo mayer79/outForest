@@ -19,12 +19,12 @@ pkg <- file.path("release", "outForest")
 create_package(
   pkg,
   fields = list(
-    Title = "Multivariate Outlier Detection and Replacement by Random Forest Predictions",
+    Title = "Multivariate Outlier Detection and Replacement",
     Type = "Package",
     Version = "0.1.0",
     Date = Sys.Date(),
-    Description = "Provides a random forest based implementation of the method described in Chapter 7.1.2 ('Regression Model Based Anomaly detection') of Chandola et al. (2009) <doi.acm.org/10.1145/1541880.1541882>. It works as follows: Each numeric variable is regressed onto all other variables by a random forest. If the scaled absolute difference between observed value and out-of-bag prediction of the corresponding random forest is suspiciously large, then a value is considered an outlier. Our package offers different options to replace such outliers, e.g. by realistic values found via predictive mean matching. Once the method is trained on a reference data, it can be applied to new data.",
-    `Authors@R` = "person('Michael', 'Mayer', email = 'mayermichael79@gmail.com', role = c('aut', 'cre', 'cph'))",
+    Description = "Provides a random forest based implementation of the method described in Chapter 7.1.2 (Regression model based anomaly detection) of Chandola et al. (2009) <doi.acm.org/10.1145/1541880.1541882>. It works as follows: Each numeric variable is regressed onto all other variables by a random forest. If the scaled absolute difference between observed value and out-of-bag prediction of the corresponding random forest is suspiciously large, then a value is considered an outlier. The package offers different options to replace such outliers, e.g. by realistic values found via predictive mean matching. Once the method is trained on a reference data, it can be applied to new data.",
+    `Authors@R` = "person('Michael', 'Mayer', email = 'mayermichael79@gmail.com', role = c('aut', 'cre'))",
     URL = "https://github.com/mayer79/outForest",
     BugReports = "https://github.com/mayer79/outForest/issues",
     Depends = "R (>= 3.5.0)",
