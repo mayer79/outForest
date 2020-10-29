@@ -14,8 +14,8 @@ install.packages("outForest")
 
 Latest version from github:
 ``` r
-# library(devtools)
-install_github("mayer79/outForest")
+library(devtools)
+install_github("mayer79/outForest", subdir = "release/outforest")
 ```
 
 ## Examples
