@@ -2,7 +2,7 @@ Type: Package
 Package: outForest
 Title: Multivariate Outlier Detection and Replacement
 Version: 0.1.1
-Date: 2020-10-28
+Date: 2020-12-22
 Authors@R: 
     person(given = "Michael",
            family = "Mayer",
@@ -11,15 +11,15 @@ Authors@R:
 Maintainer: Michael Mayer <mayermichael79@gmail.com>
 Description: Provides a random forest based implementation of
     the method described in Chapter 7.1.2 (Regression model based anomaly
-    detection) of Chandola et al. (2009)
-    <doi.acm.org/10.1145/1541880.1541882>. It works as follows: Each
-    numeric variable is regressed onto all other variables by a random
-    forest. If the scaled absolute difference between observed value and
-    out-of-bag prediction of the corresponding random forest is
-    suspiciously large, then a value is considered an outlier. The package
-    offers different options to replace such outliers, e.g. by realistic
-    values found via predictive mean matching. Once the method is trained
-    on a reference data, it can be applied to new data.
+    detection) of Chandola et al. (2009) <doi:10.1145/1541880.1541882>. It
+    works as follows: Each numeric variable is regressed onto all other
+    variables by a random forest. If the scaled absolute difference
+    between observed value and out-of-bag prediction of the corresponding
+    random forest is suspiciously large, then a value is considered an
+    outlier. The package offers different options to replace such
+    outliers, e.g. by realistic values found via predictive mean matching.
+    Once the method is trained on a reference data, it can be applied to
+    new data.
 License: GPL(>= 2)
 URL: https://github.com/mayer79/outForest
 BugReports: https://github.com/mayer79/outForest/issues
