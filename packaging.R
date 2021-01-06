@@ -42,6 +42,7 @@ use_package("ranger", "Imports")
 use_package("missRanger", "Imports", min_version = "2.1.0")
 use_package("dplyr", "Suggests")
 use_package("knitr", "Suggests")
+use_package("rmarkdown", "Suggests")
 
 # Set up other files -------------------------------------------------
 # use_readme_md()
@@ -75,7 +76,7 @@ check(pkg, manual = TRUE)
 
 # Create
 build(pkg)
-build(pkg, binary = TRUE)
+# build(pkg, binary = TRUE)
 
 # Install
 install(pkg)
@@ -88,5 +89,5 @@ check_rhub(pkg)
 
 devtools::release(pkg)
 
-usethis::use_pkgdown()
-pkgdown::build_site(pkg)
+# usethis::use_pkgdown()
+# pkgdown::build_site(pkg)
