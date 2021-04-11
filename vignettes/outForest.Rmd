@@ -48,7 +48,7 @@ In the examples below, we will meet different functions from the `outForest` pac
 
 - `generateOutliers`: To add nasty outliers to a data set.
 
-- `predict`: To apply a fitted `outRanger` object to fresh data.
+- `predict`: To apply a fitted `outForest` object to fresh data.
 
 ## Installation
 
@@ -60,7 +60,7 @@ install.packages("outForest")
 Latest version from github:
 ```
 library(devtools)
-install_github("mayer79/outForest")
+install_github("mayer79/outForest", subdir = "release/outForest")
 ```
 
 ## Examples
