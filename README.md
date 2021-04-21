@@ -1,4 +1,4 @@
-# outForest
+# outForest <a href='https://github.com/mayer79/outForest'><img src='man/figures/logo.png' align="right" height="138.5" /></a>
 
 [![CRAN version](http://www.r-pkg.org/badges/version/outForest)](https://cran.r-project.org/package=outForest) [![](https://cranlogs.r-pkg.org/badges/outForest)](https://cran.r-project.org/package=outForest) [![](https://cranlogs.r-pkg.org/badges/grand-total/outForest?color=orange)](https://cran.r-project.org/package=outForest)
 
