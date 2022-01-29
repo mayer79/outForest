@@ -12,3 +12,10 @@ checking for unstated dependencies in examples ... OK
 
 - check_win_devel()
 - check_rhub()
+
+
+checking for detritus in the temp directory ... NOTE
+  Found the following files/directories:
+    'lastMiKTeXException'
+
+0 errors √ | 0 warnings √ | 1 note x
