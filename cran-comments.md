@@ -1,9 +1,21 @@
-Resubmission due to warning
+This is a maintenance release, getting rid of CRAN's test result note on "LazyData".
 
-- Missing "rmarkdown" in suggested packages due to failed vignette build warning. None of my checks detected this problem, neither did all online package checks. A little bit frustrating.
+## R CMD check results seem okay
 
-Original purpose:
+checking for unstated dependencies in examples ... OK
+   WARNING
+  'qpdf' is needed for checks on size reduction of PDFs
 
-- Fixing a suboptimal "doi" in the description field, as suggested by Kurt Hornik.
+0 errors √ | 1 warning x | 0 notes √
+
+## Online checks seem okay as well
+
+- check_win_devel()
+- check_rhub()
 
 
+checking for detritus in the temp directory ... NOTE
+  Found the following files/directories:
+    'lastMiKTeXException'
+
+0 errors √ | 0 warnings √ | 1 note x

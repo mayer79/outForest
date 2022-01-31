@@ -1,100 +1,93 @@
-#=====================================================================================
-# BUILD THE PACKAGE
-#=====================================================================================
+#=============================================================================
+# Put together the package
+#=============================================================================
 
-if (FALSE) {
-  library(ranger)
-  library(missRanger)
-  library(FNN)
-  lapply(list.files("R", full.names = TRUE), source)
-}
+# WORKFLOW: UPDATE EXISTING PACKAGE
+# 1) Modify package content and documentation.
+# 2) Increase package number in "use_description" below.
+# 3) Go through this script and carefully answer "no" if a "use_*" function
+#    asks to overwrite the existing files. Or just skip that function call.
 
 library(usethis)
-library(devtools)
 
-# Create a new package
-dir.create(file.path("release"))
-pkg <- file.path("release", "outForest")
-
-create_package(
-  pkg,
+# Sketch of description file
+use_description(
   fields = list(
     Title = "Multivariate Outlier Detection and Replacement",
     Type = "Package",
-    Version = "0.1.1",
+    Version = "0.1.2",
     Date = Sys.Date(),
     Description = "Provides a random forest based implementation of the method described in Chapter 7.1.2 (Regression model based anomaly detection) of Chandola et al. (2009) <doi:10.1145/1541880.1541882>. It works as follows: Each numeric variable is regressed onto all other variables by a random forest. If the scaled absolute difference between observed value and out-of-bag prediction of the corresponding random forest is suspiciously large, then a value is considered an outlier. The package offers different options to replace such outliers, e.g. by realistic values found via predictive mean matching. Once the method is trained on a reference data, it can be applied to new data.",
     `Authors@R` = "person('Michael', 'Mayer', email = 'mayermichael79@gmail.com', role = c('aut', 'cre'))",
-    URL = "https://github.com/mayer79/outForest",
-    BugReports = "https://github.com/mayer79/outForest/issues",
     Depends = "R (>= 3.5.0)",
-    VignetteBuilder = "knitr",
-    License = "GPL(>= 2)",
     LazyData = NULL,
-    Maintainer = "Michael Mayer <mayermichael79@gmail.com>"),
-  open = FALSE)
+    Maintainer = "Michael Mayer <mayermichael79@gmail.com>"
+  ),
+  roxygen = TRUE
+)
 
-file.copy(file.path(pkg, "DESCRIPTION"), to = getwd(), overwrite = TRUE)
-# Use package has no option to look for pkg, so we first copy description from pkg, modify it and move back
+use_gpl_license(2)
+use_github_links() # use this if this project is on github
+
+# Your files that do not belong to the package itself (others are added by "use_* function")
+use_build_ignore(c("^packaging.R$", "[.]Rproj$", "^backlog$",
+                   "^cran-comments.md$", "^logo.png$"), escape = FALSE)
+
+# Required external packages
 use_package("stats", "Imports")
 use_package("graphics", "Imports")
 use_package("FNN", "imports")
 use_package("ranger", "Imports")
 use_package("missRanger", "Imports", min_version = "2.1.0")
+
 use_package("dplyr", "Suggests")
-use_package("knitr", "Suggests")
-use_package("rmarkdown", "Suggests")
 
-# Set up other files -------------------------------------------------
-# use_readme_md()
-# use_news_md()
-# use_cran_comments()
+# If your code uses the pipe operator %>%
+# use_pipe()
 
-# Copy readme etc.
-file.copy(c(".Rbuildignore", "NEWS.md", "README.md", "cran-comments.md", "DESCRIPTION"), pkg, overwrite = TRUE)
+# If your package contains data. Google how to document
+# use_data()
 
-# Copy R scripts and document them
-if (!dir.exists(file.path(pkg, "R"))) {
-  dir.create(file.path(pkg, "R"))
-}
-file.copy(list.files("R", full.names = TRUE), file.path(pkg, "R"), overwrite = TRUE)
-devtools::document(pkg)
+# Add short docu in Markdown (without running R code)
+use_readme_md()
+
+# Longer docu in RMarkdown (with running R code). Often quite similar to readme.
+use_vignette("outForest")
+
+# If you want to add unit tests
+# use_testthat()
+# use_test("test-outForest.R")
+
+# On top of NEWS.md, describe changes made to the package
+use_news_md()
 
 # Add logo
 use_logo("logo.png")
-dir.create(file.path(pkg, "man", "figures"))
-file.copy(file.path("man", "figures", "logo.png"),
-          file.path(pkg, "man", "figures", "logo.png"))
 
-if (TRUE) {
-  # Copy vignette
-  # use_vignette(name = "outForest", title = "outForest")
-  dir.create(file.path(pkg, "vignettes"), showWarnings = FALSE)
-  dir.create(file.path(pkg, "doc"), showWarnings = FALSE)
-  dir.create(file.path(pkg, "Meta"), showWarnings = FALSE)
-  file.copy(list.files("vignettes", full.names = TRUE),
-            file.path(pkg, "vignettes"), overwrite = TRUE)
+# If package goes to CRAN: infos (check results etc.) for CRAN
+use_cran_comments()
 
-  devtools::build_vignettes(pkg)
+
+#=============================================================================
+# Finish package building (can use fresh session)
+#=============================================================================
+
+library(devtools)
+
+document()
+# test()
+build_vignettes()
+check(manual = TRUE, cran = TRUE)
+build()
+# build(binary = TRUE)
+install()
+
+# Run only if package is public(!) and should go to CRAN
+if (FALSE) {
+  check_win_devel()
+  check_rhub()
+
+  # Wait until above checks are passed without relevant notes/warnings
+  # then submit to CRAN
+  release()
 }
-
-# Check
-check(pkg, manual = TRUE)
-
-# Create
-build(pkg)
-# build(pkg, binary = TRUE)
-
-# Install
-install(pkg)
-
-# modify .Rbuildignore in build project to ignore the proj file.
-
-check_win_devel(pkg)
-
-check_rhub(pkg)
-
-devtools::release(pkg)
-
-# usethis::use_pkgdown()
-# pkgdown::build_site(pkg)

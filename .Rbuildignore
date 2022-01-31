@@ -1,7 +1,12 @@
-^.*\.Rproj$
-^\.Rproj\.user$
+^LICENSE\.md$
 ^cran-comments\.md$
-^outRanger\.Rproj$
 ^doc$
 ^Meta$
-^outForest\.Rproj$
+^packaging.R$
+[.]Rproj$
+^backlog$
+^cran-comments.md$
+^logo.png$
+^.*\.Rproj$
+^\.Rproj\.user$
+^CRAN-RELEASE$
