@@ -14,26 +14,15 @@ library(usethis)
 use_description(
   fields = list(
     Title = "Multivariate Outlier Detection and Replacement",
-    Type = "Package",
-    Version = "0.1.2",
-    Date = Sys.Date(),
+    Version = "0.1.2.9000",
     Description = "Provides a random forest based implementation of the method described in Chapter 7.1.2 (Regression model based anomaly detection) of Chandola et al. (2009) <doi:10.1145/1541880.1541882>. It works as follows: Each numeric variable is regressed onto all other variables by a random forest. If the scaled absolute difference between observed value and out-of-bag prediction of the corresponding random forest is suspiciously large, then a value is considered an outlier. The package offers different options to replace such outliers, e.g. by realistic values found via predictive mean matching. Once the method is trained on a reference data, it can be applied to new data.",
     `Authors@R` = "person('Michael', 'Mayer', email = 'mayermichael79@gmail.com', role = c('aut', 'cre'))",
     Depends = "R (>= 3.5.0)",
-    LazyData = NULL,
-    Maintainer = "Michael Mayer <mayermichael79@gmail.com>"
+    LazyData = NULL
   ),
   roxygen = TRUE
 )
 
-use_gpl_license(2)
-use_github_links() # use this if this project is on github
-
-# Your files that do not belong to the package itself (others are added by "use_* function")
-use_build_ignore(c("^packaging.R$", "[.]Rproj$", "^backlog$",
-                   "^cran-comments.md$", "^logo.png$"), escape = FALSE)
-
-# Required external packages
 use_package("stats", "Imports")
 use_package("graphics", "Imports")
 use_package("FNN", "imports")
@@ -41,6 +30,14 @@ use_package("ranger", "Imports")
 use_package("missRanger", "Imports", min_version = "2.1.0")
 
 use_package("dplyr", "Suggests")
+
+use_gpl_license(2)
+
+use_github_links() # use this if this project is on github
+
+# Your files that do not belong to the package itself (others are added by "use_* function")
+use_build_ignore(c("^packaging.R$", "[.]Rproj$", "^backlog$",
+                   "^cran-comments.md$", "^logo.png$"), escape = FALSE)
 
 # If your code uses the pipe operator %>%
 # use_pipe()
