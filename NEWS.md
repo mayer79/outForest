@@ -1,3 +1,14 @@
+# outForest 0.1.3
+
+## Dependencies
+
+- Removed {dplyr} from suggested packages.
+
+## Maintenance
+
+- Introduces github worflows.
+- Added gitpages.
+
 # outForest 0.1.2 
 
 Maintenance update, getting rid of CRAN test result note on "LazyData".
