@@ -34,11 +34,11 @@ Extracts outliers from object of class 'outForest'. The outliers are sorted by t
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{default}: Default method not implemented yet.
+\item \code{outliers(default)}: Default method not implemented yet.
 
-\item \code{outForest}: Extract outliers from outForest object.
+\item \code{outliers(outForest)}: Extract outliers from outForest object.
+
 }}
-
 \examples{
 x <- outForest(iris)
 outliers(x)
