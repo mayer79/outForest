@@ -8,6 +8,8 @@
 
 - Introduces github worflows.
 - Added gitpages.
+- Updated documentation.
+- Introduces unit tests.
 
 # outForest 0.1.2 
 
