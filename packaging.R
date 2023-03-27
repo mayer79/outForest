@@ -76,7 +76,7 @@ use_github_action("pkgdown")
 library(devtools)
 
 document()
-# test()
+test()
 check(manual = TRUE, cran = TRUE)
 build()
 # build(binary = TRUE)
