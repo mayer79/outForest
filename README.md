@@ -1,26 +1,35 @@
-# outForest <a href='https://github.com/mayer79/outForest'><img src='man/figures/logo.png' align="right" height="138.5" /></a>
+# outForest <a href='https://github.com/mayer79/outForest'><img src='man/figures/logo.png' align="right" height="139" /></a>
 
-[![CRAN version](http://www.r-pkg.org/badges/version/outForest)](https://cran.r-project.org/package=outForest) [![](https://cranlogs.r-pkg.org/badges/outForest)](https://cran.r-project.org/package=outForest) [![](https://cranlogs.r-pkg.org/badges/grand-total/outForest?color=orange)](https://cran.r-project.org/package=outForest)
+<!-- badges: start -->
 
-`outForest` is a random forest regression based multivariate anomaly detection method. Each numeric variable is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than a prespecified threshold, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers.
+[![CRAN status](http://www.r-pkg.org/badges/version/outForest)](https://cran.r-project.org/package=outForest)
+[![R-CMD-check](https://github.com/mayer79/outForest/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mayer79/outForest/actions)
+[![Codecov test coverage](https://codecov.io/gh/mayer79/outForest/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mayer79/outForest?branch=main)
 
-The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. The `outForest` package estimates this conditional mean by a random forest.
+[![](https://cranlogs.r-pkg.org/badges/outForest)](https://cran.r-project.org/package=outForest) 
+[![](https://cranlogs.r-pkg.org/badges/grand-total/outForest?color=orange)](https://cran.r-project.org/package=outForest)
+
+<!-- badges: end -->
+
+## Overview
+
+{outForest} is a random forest regression based multivariate anomaly detection method. Each numeric variable is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is larger than a prespecified threshold, then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers.
+
+The method can be viewed as a multivariate extension of a basic univariate outlier detection method where a value is considered an outlier if it is more than e.g. three times the standard deviation away from its mean. In the multivariate case, instead of comparing a value with the overall mean, rather the difference to the conditional mean is considered. {outForest} package estimates this conditional mean by a random forest.
 
 Once the method is trained on a reference data, it can be applied to new data.
 
 ## Installation
-From CRAN:
-``` r
+
+```r
+# From CRAN
 install.packages("outForest")
+
+# Development version
+devtools::install_github("mayer79/outForest")
 ```
 
-Latest version from github:
-``` r
-library(devtools)
-install_github("mayer79/outForest")
-```
-
-## Examples
+## Usage
 
 We first generate a data set with about 2% outliers values in each numeric column. Then, we try to identify them.
 

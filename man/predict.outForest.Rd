@@ -39,7 +39,9 @@
 An object of type \code{outForest}.
 }
 \description{
-Identify outliers in new data set based on previously fitted 'outForest' object. The result of \code{predict} is again an object of type 'outForest'. All its methods can be applied to it.
+Identify outliers in new data set based on previously fitted "outForest" object.
+The result of \code{predict} is again an object of type "outForest".
+All its methods can be applied to it.
 }
 \examples{
 (out <- outForest(iris, allow_predictions = TRUE))
