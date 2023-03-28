@@ -6,7 +6,7 @@
 
 ## Maintenance
 
-- Introduces github worflows.
+- Introduces github workflows.
 - Added gitpages.
 - Updated documentation.
 - Introduces unit tests.
