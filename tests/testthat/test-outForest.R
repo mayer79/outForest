@@ -77,6 +77,13 @@ test_that("setting a seed gives identical results", {
   expect_identical(x_1, x_2)
 })
 
+test_that("using a very large outlier will avoid finding outliers", {
+  x <- outForest(
+    X[-1L, ], seed = 1L, min.node.size = 10L, verbose = FALSE, threshold = 100
+  )
+  expect_true(nrow(outliers(x)) == 0L)
+})
+
 test_that("predict() does not work when allow_predictions = FALSE", {
   x <- outForest(X, seed = 1L, min.node.size = 10L, verbose = FALSE)
   expect_error(predict(x, x[1L, ]))
@@ -88,5 +95,14 @@ test_that("predict() works when allow_predictions = TRUE", {
   )
   expect_no_error(out <- predict(x, X[1L, ]))
   expect_true(nrow(outliers(out)) >= 1L)
+
+  expect_no_error(out_na <- predict(x, X_NA[2L, ])) # predict with missings
 })
 
+test_that("predict() works when prediction data has a missing value", {
+  x <- outForest(
+    X[-1L, ], seed = 1L, min.node.size = 10L, verbose = FALSE, allow_predictions = TRUE
+  )
+  expect_no_error(out <- predict(x, X[1L, ]))
+  expect_true(nrow(outliers(out)) >= 1L)
+})

@@ -1,21 +1,22 @@
-This is a maintenance release, getting rid of CRAN's test result note on "LazyData".
+# outForest 0.1.3
+
+- This update removes {dplyr} from suggested packages. 
+- Furthermore, it introduces unit tests.
+- Switching to package::function() logic
 
 ## R CMD check results seem okay
 
-checking for unstated dependencies in examples ... OK
-   WARNING
-  'qpdf' is needed for checks on size reduction of PDFs
+Usual warning: 
 
-0 errors √ | 1 warning x | 0 notes √
+'qpdf' is needed for checks on size reduction of PDFs
 
-## Online checks seem okay as well
+## check_win_devel()
 
-- check_win_devel()
-- check_rhub()
+Status: OK
 
 
-checking for detritus in the temp directory ... NOTE
-  Found the following files/directories:
-    'lastMiKTeXException'
+## check_rhub()
 
-0 errors √ | 0 warnings √ | 1 note x
+Usual note: 
+
+lastMiKTeXException
