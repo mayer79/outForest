@@ -78,7 +78,7 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using ‘outForest’</h1>
             
-            <h4 data-toc-skip class="date">2023-03-27</h4>
+            <h4 data-toc-skip class="date">2023-03-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mayer79/outForest/blob/HEAD/vignettes/outForest.Rmd" class="external-link"><code>vignettes/outForest.Rmd</code></a></small>
       <div class="hidden name"><code>outForest.Rmd</code></div>
@@ -100,12 +100,12 @@ times the RMSE of the out-of-bag predictions), then a value is
 considered an outlier. After identification of outliers, they can be
 replaced e.g. by predictive mean matching from the non-outliers.</p>
 <p>The method can be viewed as a multivariate extension of a basic
-univariate outlier detection method where a value is considered an
-outlier if it is more than e.g. three times the standard deviation away
-from its mean. In the multivariate case, instead of comparing a value
-with the overall mean, rather the difference to the conditional mean is
-considered. {outForest} estimates this conditional mean by a random
-forest.</p>
+univariate outlier detection method, in which a value is considered an
+outlier if it deviates from the mean by more than, say, three times the
+standard deviation. In the multivariate case, instead of comparing a
+value with the <em>overall mean</em>, rather the difference to the
+<em>conditional mean</em> is considered. {outForest} estimates this
+conditional mean by a random forest.</p>
 <p>Specificly, the outlier score of the <span class="math inline">\(i\)</span>-th observed value <span class="math inline">\(x_{ij}\)</span> of variable <span class="math inline">\(j\)</span> is defined as <span class="math display">\[
   s_{ij} = \frac{x_{ij} - \text{pred}_{ij}}{\text{rmse}_j},
 \]</span> where <span class="math inline">\(\text{pred}_{ij}\)</span> is
@@ -148,8 +148,8 @@ fresh data.</p></li>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>We first generate a data set with two truely multivariate outliers.
-Then, we use <code><a href="../reference/outForest.html">outForest()</a></code> to find them.</p>
+<p>We first generate a data set with two multivariate outliers. Then, we
+use <code><a href="../reference/outForest.html">outForest()</a></code> to find them.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mayer79/outForest" class="external-link">outForest</a></span><span class="op">)</span></span>
 <span></span>
