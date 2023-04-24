@@ -1,3 +1,8 @@
+# outForest 1.0.0
+
+- Pushing to version 1.0.0 to show maturity.
+- Small improvements in documentation
+
 # outForest 0.1.3
 
 ## Dependencies
