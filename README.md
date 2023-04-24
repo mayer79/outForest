@@ -1,4 +1,4 @@
-# outForest <a href='https://github.com/mayer79/outForest'><img src='man/figures/logo.png' align="right" height="139" /></a>
+# {outForest} <a href='https://github.com/mayer79/outForest'><img src='man/figures/logo.png' align="right" height="139" /></a>
 
 <!-- badges: start -->
 
