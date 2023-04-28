@@ -1,3 +1,8 @@
+# outForest 1.0.1
+
+- Use latex formulas in help files
+- Improved documentation
+
 # outForest 1.0.0
 
 - Pushing to version 1.0.0 to show maturity.

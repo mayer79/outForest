@@ -1,6 +1,6 @@
 Package: outForest
 Title: Multivariate Outlier Detection and Replacement
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     person(given = "Michael",
            family = "Mayer",
