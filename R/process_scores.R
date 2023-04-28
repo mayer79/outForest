@@ -24,7 +24,7 @@ process_scores <- function(data, scores, predData, v, rmse, replace, pmm.k, thre
     # Bound outlier count
     max_n_outliers <- min(max_n_outliers, max_prop_outliers * nrow(data) * length(v))
     if (sum(is_outlier) > max_n_outliers) {
-      threshold <- sort(abs(scores[is_outlier]), decreasing = TRUE)[max_n_outliers + 1]
+      threshold <- sort(abs(scores[is_outlier]), decreasing = TRUE)[max_n_outliers + 1L]
       is_outlier <- abs(scores) > threshold
     }
 

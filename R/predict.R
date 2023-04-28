@@ -1,19 +1,23 @@
 #' Out-of-Sample Application
 #'
-#' Identify outliers in new data set based on previously fitted "outForest" object.
-#' The result of \code{predict} is again an object of type "outForest".
+#' Identify outliers in new data based on previously fitted "outForest" object.
+#' The result of \code{predict()} is again an object of type "outForest".
 #' All its methods can be applied to it.
 #'
 #' @param object An object of class "outForest".
 #' @param newdata A new \code{data.frame} to be assessed for numeric outliers.
-#' @param replace Should outliers be replaced by predicting mean matching (from the original non-outliers) on the predictions ("pmm", the default), by predictions ("predictions"), by \code{NA} ("NA"). Use "no" to keep outliers as they are.
-#' @param pmm.k For \code{replace = "pmm"}, how many nearest prediction neighbours (from the original non-outliers) be considered to sample observed values from?
+#' @param replace Should outliers be replaced via predictive mean matching "pmm" (default),
+#' by "predictions", or by \code{NA} ("NA"). Use "no" to keep outliers as they are.
+#' @param pmm.k For \code{replace = "pmm"}, from how many nearest OOB prediction neighbours
+#' (from the original non-outliers) to sample?
 #' @param threshold Threshold above which an outlier score is considered an outlier.
-#' @param max_n_outliers Maximal number of outliers to identify. Will be used in combination with \code{threshold} and \code{max_prop_outliers}.
-#' @param max_prop_outliers Maximal relative count of outliers. Will be used in combination with \code{threshold} and \code{max_n_outliers}.
+#' @param max_n_outliers Maximal number of outliers to identify. Will be used in
+#' combination with \code{threshold} and \code{max_prop_outliers}.
+#' @param max_prop_outliers Maximal relative count of outliers. Will be used in
+#' combination with \code{threshold} and \code{max_n_outliers}.
 #' @param seed Integer random seed.
 #' @param ... Further arguments passed from other methods.
-#' @return An object of type \code{outForest}.
+#' @return An object of class "outForest".
 #' @export
 #' @examples
 #' (out <- outForest(iris, allow_predictions = TRUE))
@@ -27,7 +31,7 @@
 #' @seealso \code{\link{outForest}}, \code{\link{outliers}}, \code{\link{Data}}.
 predict.outForest <- function(object, newdata,
                               replace = c("pmm", "predictions", "NA", "no"),
-                              pmm.k = 3, threshold = object$threshold,
+                              pmm.k = 3L, threshold = object$threshold,
                               max_n_outliers = Inf,
                               max_prop_outliers = 1, seed = NULL, ...) {
   replace <- match.arg(replace)
@@ -95,7 +99,3 @@ predict.outForest <- function(object, newdata,
   class(out) <- c("outForest", "list")
   out
 }
-
-
-
-
