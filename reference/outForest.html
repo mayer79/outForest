@@ -5,12 +5,12 @@ Each numeric variable to be checked for outliers is regressed onto all other
 variables using a random forest. If the scaled absolute difference between observed
 value and out-of-bag prediction is larger than some predefined threshold
 (default is 3), then a value is considered an outlier, see Details below.
-After identification of outliers, they can be replaced e.g. by
+After identification of outliers, they can be replaced, e.g., by
 predictive mean matching from the non-outliers.
 Since the random forest algorithm 'ranger' does not allow for missing values,
 any missing value is first being imputed by chained random forests.
 The method can be viewed as a multivariate extension of a basic univariate outlier
-detection method where a value is considered an outlier if it is more than e.g.
+detection method where a value is considered an outlier if it is more than, e.g.,
 three times the standard deviation away from its mean. In the multivariate case,
 instead of comparing a value with the overall mean, rather the difference to the
 conditional mean is considered. The 'outForest()' function estimates this conditional
@@ -33,7 +33,7 @@ allow_predictions, it can be applied to new data."><meta property="og:image" con
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">outForest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.1</span>
       </span>
     </div>
 
@@ -74,12 +74,12 @@ Each numeric variable to be checked for outliers is regressed onto all other
 variables using a random forest. If the scaled absolute difference between observed
 value and out-of-bag prediction is larger than some predefined threshold
 (default is 3), then a value is considered an outlier, see Details below.
-After identification of outliers, they can be replaced e.g. by
+After identification of outliers, they can be replaced, e.g., by
 predictive mean matching from the non-outliers.
 Since the random forest algorithm 'ranger' does not allow for missing values,
 any missing value is first being imputed by chained random forests.
 The method can be viewed as a multivariate extension of a basic univariate outlier
-detection method where a value is considered an outlier if it is more than e.g.
+detection method where a value is considered an outlier if it is more than, e.g.,
 three times the standard deviation away from its mean. In the multivariate case,
 instead of comparing a value with the overall mean, rather the difference to the
 conditional mean is considered. The 'outForest()' function estimates this conditional
@@ -114,19 +114,18 @@ mean by a random forest. If the method is trained on a reference data with optio
 
 <dt>formula</dt>
 <dd><p>A two-sided formula specifying variables to be checked (left hand side)
-and variables used to check (right hand side). Defaults to . ~ ., i.e. use all
+and variables used to check (right hand side). Defaults to <code>. ~ .</code>, i.e., use all
 variables to check all (numeric) variables.</p></dd>
 
 
 <dt>replace</dt>
-<dd><p>Should outliers be replaced by predicting mean matching on the OOB
-predictions ("pmm", the default), by OOB predictions ("predictions"), by <code>NA</code>
-("NA"). Use "no" to keep outliers as they are.</p></dd>
+<dd><p>Should outliers be replaced via predictive mean matching "pmm" (default),
+by "predictions", or by <code>NA</code> ("NA"). Use "no" to keep outliers as they are.</p></dd>
 
 
 <dt>pmm.k</dt>
-<dd><p>For <code>replace = "pmm"</code>, how many nearest prediction neighbours
-(without outliers) be considered to sample observed values from?</p></dd>
+<dd><p>For <code>replace = "pmm"</code>, from how many nearest OOB prediction neighbours
+(from the original non-outliers) to sample?</p></dd>
 
 
 <dt>threshold</dt>
@@ -150,8 +149,8 @@ With 40, the value is relatively high. This reduces the impact of outliers.</p><
 
 
 <dt>allow_predictions</dt>
-<dd><p>Should the resulting outForest be used on new data?
-Default is <code>FALSE</code> as fitted random forests can be huge.</p></dd>
+<dd><p>Should the resulting "outForest" object be applied to new data?
+Default is <code>FALSE</code>.</p></dd>
 
 
 <dt>impute_multivariate</dt>
@@ -160,8 +159,8 @@ by <code><a href="https://rdrr.io/pkg/missRanger/man/missRanger.html" class="ext
 
 
 <dt>impute_multivariate_control</dt>
-<dd><p>Parameters passed to <code><a href="https://rdrr.io/pkg/missRanger/man/missRanger.html" class="external-link">missRanger::missRanger</a></code>
-if data contains missing values.</p></dd>
+<dd><p>Parameters passed to
+<code><a href="https://rdrr.io/pkg/missRanger/man/missRanger.html" class="external-link">missRanger::missRanger()</a></code> (only if data contains missing values).</p></dd>
 
 
 <dt>seed</dt>
@@ -182,7 +181,7 @@ less trees (e.g. <code>num.trees = 20</code>) and/or a low value of <code>mtry</
     <h2>Value</h2>
     
 
-<p>An object of type 'outForest' and a list with the following elements.</p><ul><li><p><code>Data</code>: Original data set in unchanged row order but optionally with
+<p>An object of class "outForest" and a list with the following elements.</p><ul><li><p><code>Data</code>: Original data set in unchanged row order but optionally with
 outliers replaced. Can be extracted with the <code>Data</code> function.</p></li>
 <li><p><code>outliers</code>: Compact representation of outliers, for details see the
 <code>outliers</code> function used to extract them.</p></li>
@@ -203,14 +202,16 @@ NULL if <code>allow_predictions = FALSE</code>.</p></li>
 </ul></div>
     <div id="details">
     <h2>Details</h2>
-    <p>The outlier score of the i-th value x_ij of the j-th variable is defined as
-s_ij = (x_ij - pred_ij) / rmse_j, where pred_ij is the corresponding out-of-bag
-prediction of the j-th random forest and rmse_j its RMSE. If |s_ij| &gt; L with
-threshold L, then x_ij is considered an outlier.
+    <p>The outlier score of the i-th value \(x_{ij}\) of the j-th variable is defined as
+\(s_{ij} = (x_{ij} - p_{ij}) / \text{rmse}_j\), where \(p_{ij}\)
+is the corresponding out-of-bag
+prediction of the j-th random forest and \(\text{rmse}_j\) its RMSE.
+If \(|s_{ij}| &gt; L\) with
+threshold \(L\), then \(x_{ij}\) is considered an outlier.
 For large data sets, just by chance, many values can surpass the default threshold
 of 3. To reduce the number of outliers, the threshold can be increased.
 Alternatively, the number of outliers can be limited by the two arguments
-<code>max_n_outliers</code> and <code>max_prop_outliers</code>. E.g. if at most ten outliers
+<code>max_n_outliers</code> and <code>max_prop_outliers</code>. For instance, if at most ten outliers
 are to be identified, set <code>max_n_outliers = 10</code>.</p>
     </div>
     <div id="references">
