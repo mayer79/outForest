@@ -21,19 +21,21 @@
 
 \item{newdata}{A new \code{data.frame} to be assessed for numeric outliers.}
 
-\item{replace}{Should outliers be replaced via predictive mean matching "pmm" (default),
-by "predictions", or by \code{NA} ("NA"). Use "no" to keep outliers as they are.}
+\item{replace}{Should outliers be replaced via predictive mean matching "pmm"
+(default), by "predictions", or by \code{NA} ("NA").
+Use "no" to keep outliers as they are.}
 
 \item{pmm.k}{For \code{replace = "pmm"}, from how many nearest OOB prediction neighbours
 (from the original non-outliers) to sample?}
 
-\item{threshold}{Threshold above which an outlier score is considered an outlier.}
+\item{threshold}{Threshold above which an outlier score is considered an outlier.
+The default is 3.}
 
-\item{max_n_outliers}{Maximal number of outliers to identify. Will be used in
-combination with \code{threshold} and \code{max_prop_outliers}.}
+\item{max_n_outliers}{Maximal number of outliers to identify.
+Will be used in combination with \code{threshold} and \code{max_prop_outliers}.}
 
-\item{max_prop_outliers}{Maximal relative count of outliers. Will be used in
-combination with \code{threshold} and \code{max_n_outliers}.}
+\item{max_prop_outliers}{Maximal relative count of outliers.
+Will be used in combination with \code{threshold} and \code{max_n_outliers}.}
 
 \item{seed}{Integer random seed.}
 
@@ -43,8 +45,8 @@ combination with \code{threshold} and \code{max_n_outliers}.}
 An object of class "outForest".
 }
 \description{
-Identify outliers in new data based on previously fitted "outForest" object.
-The result of \code{predict()} is again an object of type "outForest".
+Identifies outliers in new data based on previously fitted "outForest" object.
+The result of \code{predict()} is again an object of class "outForest".
 All its methods can be applied to it.
 }
 \examples{
@@ -58,5 +60,5 @@ plot(pred)
 plot(pred, what = "scores")
 }
 \seealso{
-\code{\link{outForest}}, \code{\link{outliers}}, \code{\link{Data}}.
+\code{\link[=outForest]{outForest()}}, \code{\link[=outliers]{outliers()}}, \code{\link[=Data]{Data()}}
 }

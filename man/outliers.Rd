@@ -23,8 +23,9 @@ A \code{data.frame} with one row per outlier. The columns are as follows:
 \item \code{row}, \code{col}: Row and column in original data with outlier.
 \item \code{observed}: Observed value.
 \item \code{predicted}: Predicted value.
-\item \code{rmse}: Scaling factor used to normalize the difference between observed and predicted.
-\item \code{score}: Outlier score defined as (observed-predicted)/rmse.
+\item \code{rmse}: Scaling factor used to normalize the difference between observed
+and predicted.
+\item \code{score}: Outlier score defined as (observed-predicted)/RMSE.
 \item \code{threshold}: Threshold above which an outlier score counts as outlier.
 \item \code{replacement}: Value used to replace observed value.
 }
