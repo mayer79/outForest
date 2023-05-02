@@ -84,8 +84,9 @@ The outliers are sorted by their absolute score in descending fashion.</p>
 <p>A <code>data.frame</code> with one row per outlier. The columns are as follows:</p><ul><li><p><code>row</code>, <code>col</code>: Row and column in original data with outlier.</p></li>
 <li><p><code>observed</code>: Observed value.</p></li>
 <li><p><code>predicted</code>: Predicted value.</p></li>
-<li><p><code>rmse</code>: Scaling factor used to normalize the difference between observed and predicted.</p></li>
-<li><p><code>score</code>: Outlier score defined as (observed-predicted)/rmse.</p></li>
+<li><p><code>rmse</code>: Scaling factor used to normalize the difference between observed
+and predicted.</p></li>
+<li><p><code>score</code>: Outlier score defined as (observed-predicted)/RMSE.</p></li>
 <li><p><code>threshold</code>: Threshold above which an outlier score counts as outlier.</p></li>
 <li><p><code>replacement</code>: Value used to replace observed value.</p></li>
 </ul></div>
