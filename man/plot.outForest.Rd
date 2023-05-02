@@ -11,8 +11,8 @@
 
 \item{what}{What should be plotted? One of "counts" (the default) or "scores".}
 
-\item{...}{Further arguments passed to \code{graphics::barplot()} or
-\code{graphics::stripchart()}.}
+\item{...}{Further arguments passed to \code{\link[graphics:barplot]{graphics::barplot()}} or
+\code{\link[graphics:stripchart]{graphics::stripchart()}}.}
 }
 \value{
 A list.

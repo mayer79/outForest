@@ -2,6 +2,7 @@
 #'
 #' Internal function used to process scores and replace outliers.
 #'
+#' @noRd
 #' @param data Data set.
 #' @param scores Matrix with outlier scores.
 #' @param predData Prediction data.frame.
@@ -14,7 +15,7 @@
 #' @param max_prop_outliers max_prop_outliers.
 #' @param allow_predictions allow_predictions.
 #' @param obj outForest object.
-#' @return A list.
+#' @returns A list.
 process_scores <- function(data, scores, predData, v, rmse, replace, pmm.k, threshold,
                            max_n_outliers, max_prop_outliers, allow_predictions,
                            obj = NULL) {
@@ -80,5 +81,3 @@ process_scores <- function(data, scores, predData, v, rmse, replace, pmm.k, thre
     rmse = rmse
   )
 }
-
-

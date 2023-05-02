@@ -4,7 +4,7 @@
 #'
 #' @param x A on object of class "outForest".
 #' @param ... Further arguments passed from other methods.
-#' @return Invisibly, the input is returned.
+#' @returns Invisibly, the input is returned.
 #' @export
 #' @examples
 #' x <- outForest(iris)
@@ -23,7 +23,7 @@ print.outForest <- function(x, ...) {
 #'
 #' @param object A on object of class "outForest".
 #' @param ... Further arguments passed from other methods.
-#' @return A list of summary statistics.
+#' @returns A list of summary statistics.
 #' @export
 #' @examples
 #' out <- outForest(iris, seed = 34, verbose = 0)
@@ -43,15 +43,15 @@ summary.outForest <- function(object, ...) {
 #' Plots outForest
 #'
 #' This function can plot aspects of an "outForest" object.
-#' For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot.
-#' For \code{what = "scores"}, outlier scores (i.e. the scaled difference between
+#' For `what = "counts"`, the number of outliers per variable is visualized as a barplot.
+#' For `what = "scores"`, outlier scores (i.e. the scaled difference between
 #' predicted and observed value) are shown as scatter plot per variable.
 #'
 #' @param x An object of class "outForest".
 #' @param what What should be plotted? One of "counts" (the default) or "scores".
-#' @param ... Further arguments passed to \code{graphics::barplot()} or
-#' \code{graphics::stripchart()}.
-#' @return A list.
+#' @param ... Further arguments passed to [graphics::barplot()] or
+#'   [graphics::stripchart()].
+#' @returns A list.
 #' @export
 #' @examples
 #' irisWithOutliers <- generateOutliers(iris, seed = 345)
@@ -93,7 +93,7 @@ plot.outForest <- function(x, what = c("counts", "scores"), ...) {
 #' Checks if an object inherits class "outForest".
 #'
 #' @param x Any object.
-#' @return A logical vector of length one.
+#' @returns A logical vector of length one.
 #' @export
 #' @examples
 #' a <- outForest(iris)
@@ -103,14 +103,13 @@ is.outForest <- function(x) {
   inherits(x, "outForest")
 }
 
-
 #' Extracts Data
 #'
 #' Extracts data with optionally replaced outliers from object of class "outForest".
 #'
 #' @param object An object of class "outForest".
 #' @param ... Arguments passed from or to other methods.
-#' @return A \code{data.frame}.
+#' @returns A `data.frame`.
 #' @export
 #' @examples
 #' x <- outForest(iris)
@@ -131,7 +130,6 @@ Data.outForest <- function(object, ...) {
   object$Data
 }
 
-
 #' Extracts Outliers
 #'
 #' Extracts outliers from object of class "outForest".
@@ -139,16 +137,16 @@ Data.outForest <- function(object, ...) {
 #'
 #' @param object An object of class "outForest".
 #' @param ... Arguments passed from or to other methods.
-#' @return A \code{data.frame} with one row per outlier. The columns are as follows:
-#' \itemize{
-#'   \item \code{row}, \code{col}: Row and column in original data with outlier.
-#'   \item \code{observed}: Observed value.
-#'   \item \code{predicted}: Predicted value.
-#'   \item \code{rmse}: Scaling factor used to normalize the difference between observed and predicted.
-#'   \item \code{score}: Outlier score defined as (observed-predicted)/rmse.
-#'   \item \code{threshold}: Threshold above which an outlier score counts as outlier.
-#'   \item \code{replacement}: Value used to replace observed value.
-#' }
+#' @returns
+#'   A `data.frame` with one row per outlier. The columns are as follows:
+#'   - `row`, `col`: Row and column in original data with outlier.
+#'   - `observed`: Observed value.
+#'   - `predicted`: Predicted value.
+#'   - `rmse`: Scaling factor used to normalize the difference between observed
+#'     and predicted.
+#'   - `score`: Outlier score defined as (observed-predicted)/RMSE.
+#'   - `threshold`: Threshold above which an outlier score counts as outlier.
+#'   - `replacement`: Value used to replace observed value.
 #' @export
 #' @examples
 #' x <- outForest(iris)
