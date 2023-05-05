@@ -80,8 +80,11 @@
 #'   - `used_to_check`: Variables used for checking `v`.
 #'   - `mu`: Named vector of sample means of the original `v` (incl. outliers).
 #' @references
-#'   1. Chandola V., Banerjee A., and Kumar V. (2009). Anomaly detection: A survey. ACM Comput. Surv. 41, 3, Article 15 <dx.doi.org/10.1145/1541880.1541882>.
-#'   2. Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. Journal of Statistical Software, in press. <arxiv.org/abs/1508.04409>.
+#'   1. Chandola V., Banerjee A., and Kumar V. (2009). Anomaly detection: A survey.
+#'     ACM Comput. Surv. 41, 3, Article 15 <dx.doi.org/10.1145/1541880.1541882>.
+#'   2. Wright, M. N. & Ziegler, A. (2016). ranger: A Fast Implementation of Random
+#'     Forests for High Dimensional Data in C++ and R. Journal of Statistical Software,
+#'     in press. <arxiv.org/abs/1508.04409>.
 #' @export
 #' @examples
 #' head(irisWithOut <- generateOutliers(iris, seed = 345))
