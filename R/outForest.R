@@ -20,9 +20,9 @@
 #' `allow_predictions`, it can be applied to new data.
 #'
 #' The outlier score of the ith value \eqn{x_{ij}} of the jth variable is defined as
-#' \eqn{s_{ij} = (x_{ij} - p_{ij}) / \text{rmse}_j}, where \eqn{p_{ij}}
+#' \eqn{s_{ij} = (x_{ij} - p_{ij}) / \textrm{rmse}_j}, where \eqn{p_{ij}}
 #' is the corresponding out-of-bag prediction of the jth random forest and
-#' \eqn{\text{rmse}_j} its RMSE. If \eqn{|s_{ij}| > L} with
+#' \eqn{\textrm{rmse}_j} its RMSE. If \eqn{|s_{ij}| > L} with
 #' threshold \eqn{L}, then \eqn{x_{ij}} is considered an outlier.
 #'
 #' For large data sets, just by chance, many values can surpass the default threshold
