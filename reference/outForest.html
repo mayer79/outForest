@@ -195,9 +195,9 @@ conditional mean is considered. The 'outForest()' function estimates this condit
 mean by a random forest. If the method is trained on a reference data with option
 <code>allow_predictions</code>, it can be applied to new data.</p>
 <p>The outlier score of the ith value \(x_{ij}\) of the jth variable is defined as
-\(s_{ij} = (x_{ij} - p_{ij}) / \text{rmse}_j\), where \(p_{ij}\)
+\(s_{ij} = (x_{ij} - p_{ij}) / \textrm{rmse}_j\), where \(p_{ij}\)
 is the corresponding out-of-bag prediction of the jth random forest and
-\(\text{rmse}_j\) its RMSE. If \(|s_{ij}| &gt; L\) with
+\(\textrm{rmse}_j\) its RMSE. If \(|s_{ij}| &gt; L\) with
 threshold \(L\), then \(x_{ij}\) is considered an outlier.</p>
 <p>For large data sets, just by chance, many values can surpass the default threshold
 of 3. To reduce the number of outliers, the threshold can be increased.
