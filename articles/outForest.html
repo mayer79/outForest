@@ -78,7 +78,7 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using ‘outForest’</h1>
             
-            <h4 data-toc-skip class="date">2023-05-15</h4>
+            <h4 data-toc-skip class="date">2023-05-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mayer79/outForest/blob/HEAD/vignettes/outForest.Rmd" class="external-link"><code>vignettes/outForest.Rmd</code></a></small>
       <div class="hidden name"><code>outForest.Rmd</code></div>
@@ -95,10 +95,11 @@ described in Chapter 7.1.2 (“Regression model based anomaly detection”)
 of <span class="citation">(<a href="#ref-Chandola2009" role="doc-biblioref">Chandola, Banerjee, and Kumar 2009</a>)</span>.
 Each numeric variable is regressed onto all other variables using a
 random forest. If the scaled absolute difference between observed value
-and out-of-bag prediction is suspiciouly large (e.g. more than three
+and out-of-bag prediction is suspiciously large (e.g., more than three
 times the RMSE of the out-of-bag predictions), then a value is
 considered an outlier. After identification of outliers, they can be
-replaced e.g. by predictive mean matching from the non-outliers.</p>
+replaced, for instance, by predictive mean matching from the
+non-outliers.</p>
 <p>The method can be viewed as a multivariate extension of a basic
 univariate outlier detection method, in which a value is considered an
 outlier if it deviates from the mean by more than, say, three times the
@@ -106,10 +107,10 @@ standard deviation. In the multivariate case, instead of comparing a
 value with the <em>overall mean</em>, rather the difference to the
 <em>conditional mean</em> is considered. {outForest} estimates this
 conditional mean by a random forest.</p>
-<p>Specificly, the outlier score of the <span class="math inline">\(i\)</span>-th observed value <span class="math inline">\(x_{ij}\)</span> of variable <span class="math inline">\(j\)</span> is defined as <span class="math display">\[
+<p>Specifically, the outlier score of the <span class="math inline">\(i\)</span>-th observed value <span class="math inline">\(x_{ij}\)</span> of variable <span class="math inline">\(j\)</span> is defined as <span class="math display">\[
   s_{ij} = \frac{x_{ij} - \text{pred}_{ij}}{\text{rmse}_j},
 \]</span> where <span class="math inline">\(\text{pred}_{ij}\)</span> is
-is the corresponding out-of-bag prediction of the <span class="math inline">\(j\)</span>th random forest with RMSE <span class="math inline">\(\text{rmse}_j\)</span>. If <span class="math inline">\(|s_{ij}| &gt; L\)</span> with threshold <span class="math inline">\(L\)</span>, then <span class="math inline">\(x_{ij}\)</span> is considered an outlier.</p>
+the corresponding out-of-bag prediction of the <span class="math inline">\(j\)</span>-th random forest with RMSE <span class="math inline">\(\text{rmse}_j\)</span>. If <span class="math inline">\(|s_{ij}| &gt; L\)</span> with threshold <span class="math inline">\(L\)</span>, then <span class="math inline">\(x_{ij}\)</span> is considered an outlier.</p>
 <p>Why using random forests for calculating the conditional means? They
 often work well without parameter tuning, outliers in the input
 variables are no issue and the out-of-bag mechanism helps to provide
@@ -188,9 +189,10 @@ use <code><a href="../reference/outForest.html">outForest()</a></code> to find t
 <p><img src="outForest_files/figure-html/unnamed-chunk-2-3.png" width="576" style="display: block; margin: auto;"></p>
 <p>Note that <code><a href="../reference/outForest.html">outForest()</a></code> offers a <code>...</code> argument
 to pass options to its workhorse random forest implementation
-<code>ranger()</code>, e.g. <code>num.trees</code> or <code>mtry</code>.
-How would we use its “extra trees” variant with 50 trees? As data set,
-we add a couple of outliers to the famous iris flower data set.</p>
+<code>ranger()</code>, e.g., <code>num.trees</code> or
+<code>mtry</code>. How would we use its “extra trees” variant with 50
+trees? As data set, we add a couple of outliers to the famous iris
+flower data set.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">irisWithOutliers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generateOutliers.html">generateOutliers</a></span><span class="op">(</span><span class="va">iris</span>, p <span class="op">=</span> <span class="fl">0.02</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Sepal.Length Sepal.Width Petal.Length Petal.Width Species</span></span>
@@ -304,12 +306,12 @@ to be checked.</p>
 <h2 id="the-formula-interface">The formula interface<a class="anchor" aria-label="anchor" href="#the-formula-interface"></a>
 </h2>
 <p>By default, <code><a href="../reference/outForest.html">outForest()</a></code> uses all columns in the data set
-to check all numeric columns with missings. To override this behaviour,
+to check all numeric columns with missings. To override this behavior,
 you can use its formula interface: The left hand side specifies the
 variables to be checked (variable names separated by a <code>+</code>),
 while the right hand side lists the variables used for checking.</p>
-<p>So if you e.g. want to check only variable <code>Sepal.Length</code>
-based on <code>Species</code>, then use this syntax.</p>
+<p>If you want to check only variable <code>Sepal.Length</code> based on
+<code>Species</code>, then use this syntax.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/outForest.html">outForest</a></span><span class="op">(</span><span class="va">irisWithOutliers</span>, <span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">Species</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
@@ -362,9 +364,9 @@ side.</p>
 default threshold of 3. To reduce the number of outliers, the threshold
 can be increased. Alternatively, the number of outliers can be limited
 by the two arguments <code>max_n_outliers</code> and
-<code>max_prop_outliers</code>. E.g. if at most three outliers are to be
-identified, set <code>max_n_outliers = 3</code>. If at most 1% of the
-values are to be declared as outliers, set
+<code>max_prop_outliers</code>. For instance, if at most three outliers
+are to be identified, set <code>max_n_outliers = 3</code>. If at most 1%
+of the values are to be declared as outliers, set
 <code>max_prop_outliers = 0.01</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/outliers.html">outliers</a></span><span class="op">(</span><span class="fu"><a href="../reference/outForest.html">outForest</a></span><span class="op">(</span><span class="va">irisWithOutliers</span>, max_n_outliers <span class="op">=</span> <span class="fl">3</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
@@ -405,23 +407,14 @@ values.</p></li>
 <div class="section level2">
 <h2 id="the-algorithm-takes-too-much-time--what-can-i-do">The algorithm takes too much time. What can I do?<a class="anchor" aria-label="anchor" href="#the-algorithm-takes-too-much-time--what-can-i-do"></a>
 </h2>
-<p><code><a href="../reference/outForest.html">outForest()</a></code> is based on fitting one random forest for
-each numeric variable. Since the underlying random forest implementation
-<code>ranger()</code> uses 500 trees per default, a huge number of trees
-might be calculated. For larger data sets, the overall process can take
-very long.</p>
-<p>Here are tweaks to make things faster:</p>
+<p>By default, <code><a href="../reference/outForest.html">outForest()</a></code> fits a random forest with 500
+trees per numeric variable. Thus, the overall process can take very
+long. Here a few tweaks to make things faster:</p>
 <ul>
-<li><p>Use less trees, e.g. by setting <code>num.trees = 50</code>.
-Don’t use a too low value because this can lead to missing out-of-bag
-predictions.</p></li>
-<li><p>Use smaller number of variables to be considered in a split,
-e.g. <code>mtry = 2</code>.</p></li>
-<li><p>Use smaller bootstrap samples by setting
-e.g. <code>sample.fraction = 0.1</code>.</p></li>
-<li><p>Use a low tree depth <code>max.depth = 6</code>.</p></li>
-<li><p>Use large leafs,
-e.g. <code>min.node.size = 10000</code>.</p></li>
+<li>Use less trees, e.g., by setting <code>num.trees = 50</code>.</li>
+<li>Use smaller mtry, e.g., <code>mtry = 2</code>.</li>
+<li>Use shorter trees, e.g., setting <code>max.depth = 6</code>.</li>
+<li>Use large leaves, e.g., <code>min.node.size = 10000</code>.</li>
 </ul>
 </div>
 <div class="section level2 unnumbered">

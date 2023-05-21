@@ -176,7 +176,7 @@ function used to extract them.</p></li>
 <li><p><code>allow_predictions</code>: Same as <code>allow_predictions</code>.</p></li>
 <li><p><code>v</code>: Variables checked.</p></li>
 <li><p><code>threshold</code>: The threshold used.</p></li>
-<li><p><code>rmse</code>: Named vector of RMSE of the random forests. Used for scaling the
+<li><p><code>rmse</code>: Named vector of RMSEs of the random forests. Used for scaling the
 difference between observed values and predicted.</p></li>
 <li><p><code>forests</code>: Named list of fitted random forests.
 <code>NULL</code> if <code>allow_predictions = FALSE</code>.</p></li>
@@ -185,15 +185,13 @@ difference between observed values and predicted.</p></li>
 </ul></div>
     <div id="details">
     <h2>Details</h2>
-    <p>Since the random forest algorithm "ranger" does not allow for missing values,
-any missing value is first being imputed by chained random forests.
-The method can be viewed as a multivariate extension of a basic univariate outlier
+    <p>The method can be viewed as a multivariate extension of a basic univariate outlier
 detection method where a value is considered an outlier if it is more than, e.g.,
 three times the standard deviation away from its mean. In the multivariate case,
 instead of comparing a value with the overall mean, rather the difference to the
-conditional mean is considered. The 'outForest()' function estimates this conditional
+conditional mean is considered. <code>outForest()</code> estimates this conditional
 mean by a random forest. If the method is trained on a reference data with option
-<code>allow_predictions</code>, it can be applied to new data.</p>
+<code>allow_predictions = TRUE</code>, it can even be applied to new data.</p>
 <p>The outlier score of the ith value \(x_{ij}\) of the jth variable is defined as
 \(s_{ij} = (x_{ij} - p_{ij}) / \textrm{rmse}_j\), where \(p_{ij}\)
 is the corresponding out-of-bag prediction of the jth random forest and
@@ -204,6 +202,8 @@ of 3. To reduce the number of outliers, the threshold can be increased.
 Alternatively, the number of outliers can be limited by the two arguments
 <code>max_n_outliers</code> and <code>max_prop_outliers</code>. For instance, if at most ten outliers
 are to be identified, set <code>max_n_outliers = 10</code>.</p>
+<p>Since the random forest algorithm "ranger" does not allow for missing values,
+any missing value is first being imputed by chained random forests.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -216,8 +216,8 @@ in press. &lt;arxiv.org/abs/1508.04409&gt;.</p></li>
 </ol></div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p><code><a href="outliers.html">outliers</a></code>, <code><a href="Data.html">Data</a></code>, <code><a href="plot.outForest.html">plot.outForest</a></code>,
-<code><a href="summary.outForest.html">summary.outForest</a></code>, <code><a href="predict.outForest.html">predict.outForest</a></code>.</p></div>
+    <div class="dont-index"><p><code><a href="outliers.html">outliers()</a></code>, <code><a href="Data.html">Data()</a></code> <code><a href="plot.outForest.html">plot.outForest()</a></code>, <code><a href="summary.outForest.html">summary.outForest()</a></code>,
+<code><a href="predict.outForest.html">predict.outForest()</a></code></p></div>
     </div>
 
     <div id="ref-examples">
