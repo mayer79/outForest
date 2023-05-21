@@ -9,19 +9,21 @@
 \arguments{
 \item{x}{An object of class "outForest".}
 
-\item{what}{What should be plotted? One of "counts" (the default) or "scores".}
+\item{what}{What should be plotted? Either \code{"counts"} (the default) or \code{"scores"}.}
 
-\item{...}{Further arguments passed to \code{\link[graphics:barplot]{graphics::barplot()}} or
-\code{\link[graphics:stripchart]{graphics::stripchart()}}.}
+\item{...}{Arguments passed to \code{\link[graphics:barplot]{graphics::barplot()}} or \code{\link[graphics:stripchart]{graphics::stripchart()}}.}
 }
 \value{
 A list.
 }
 \description{
 This function can plot aspects of an "outForest" object.
-For \code{what = "counts"}, the number of outliers per variable is visualized as a barplot.
-For \code{what = "scores"}, outlier scores (i.e. the scaled difference between
-predicted and observed value) are shown as scatter plot per variable.
+\itemize{
+\item With \code{what = "counts"}, the number of outliers per variable is visualized as a
+barplot.
+\item With \code{what = "scores"}, outlier scores (i.e., the scaled difference between
+predicted and observed value) are shown as scatterplot per variable.
+}
 }
 \examples{
 irisWithOutliers <- generateOutliers(iris, seed = 345)

@@ -9,15 +9,13 @@
 #' After identification of outliers, they can be replaced, e.g., by
 #' predictive mean matching from the non-outliers.
 #'
-#' Since the random forest algorithm "ranger" does not allow for missing values,
-#' any missing value is first being imputed by chained random forests.
 #' The method can be viewed as a multivariate extension of a basic univariate outlier
 #' detection method where a value is considered an outlier if it is more than, e.g.,
 #' three times the standard deviation away from its mean. In the multivariate case,
 #' instead of comparing a value with the overall mean, rather the difference to the
-#' conditional mean is considered. The 'outForest()' function estimates this conditional
+#' conditional mean is considered. `outForest()` estimates this conditional
 #' mean by a random forest. If the method is trained on a reference data with option
-#' `allow_predictions`, it can be applied to new data.
+#' `allow_predictions = TRUE`, it can even be applied to new data.
 #'
 #' The outlier score of the ith value \eqn{x_{ij}} of the jth variable is defined as
 #' \eqn{s_{ij} = (x_{ij} - p_{ij}) / \textrm{rmse}_j}, where \eqn{p_{ij}}
@@ -30,6 +28,9 @@
 #' Alternatively, the number of outliers can be limited by the two arguments
 #' `max_n_outliers` and `max_prop_outliers`. For instance, if at most ten outliers
 #' are to be identified, set `max_n_outliers = 10`.
+#'
+#' Since the random forest algorithm "ranger" does not allow for missing values,
+#' any missing value is first being imputed by chained random forests.
 #'
 #' @param data A `data.frame` to be assessed for numeric outliers.
 #' @param formula A two-sided formula specifying variables to be checked
@@ -73,7 +74,7 @@
 #'   - `allow_predictions`: Same as `allow_predictions`.
 #'   - `v`: Variables checked.
 #'   - `threshold`: The threshold used.
-#'   - `rmse`: Named vector of RMSE of the random forests. Used for scaling the
+#'   - `rmse`: Named vector of RMSEs of the random forests. Used for scaling the
 #'     difference between observed values and predicted.
 #'   - `forests`: Named list of fitted random forests.
 #'     `NULL` if `allow_predictions = FALSE`.
@@ -93,8 +94,8 @@
 #' head(Data(out))
 #' plot(out)
 #' plot(out, what = "scores")
-#' @seealso \code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outForest}},
-#' \code{\link{summary.outForest}}, \code{\link{predict.outForest}}.
+#' @seealso [outliers()], [Data()] [plot.outForest()], [summary.outForest()],
+#'   [predict.outForest()]
 outForest <- function(data, formula = . ~ .,
                       replace = c("pmm", "predictions", "NA", "no"), pmm.k = 3L,
                       threshold = 3, max_n_outliers = Inf, max_prop_outliers = 1,

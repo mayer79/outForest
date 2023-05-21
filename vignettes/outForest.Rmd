@@ -24,15 +24,15 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-{outForest} is a random forest-based implementation of the method described in Chapter 7.1.2 ("Regression model based anomaly detection") of [@Chandola2009]. Each numeric variable is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is suspiciouly large (e.g. more than three times the RMSE of the out-of-bag predictions), then a value is considered an outlier. After identification of outliers, they can be replaced e.g. by predictive mean matching from the non-outliers.
+{outForest} is a random forest-based implementation of the method described in Chapter 7.1.2 ("Regression model based anomaly detection") of [@Chandola2009]. Each numeric variable is regressed onto all other variables using a random forest. If the scaled absolute difference between observed value and out-of-bag prediction is suspiciously large (e.g., more than three times the RMSE of the out-of-bag predictions), then a value is considered an outlier. After identification of outliers, they can be replaced, for instance, by predictive mean matching from the non-outliers.
 
 The method can be viewed as a multivariate extension of a basic univariate outlier detection method, in which a value is considered an outlier if it deviates from the mean by more than, say, three times the standard deviation. In the multivariate case, instead of comparing a value with the *overall mean*, rather the difference to the *conditional mean* is considered. {outForest} estimates this conditional mean by a random forest.
 
-Specificly, the outlier score of the $i$-th observed value $x_{ij}$ of variable $j$ is defined as 
+Specifically, the outlier score of the $i$-th observed value $x_{ij}$ of variable $j$ is defined as 
 $$
   s_{ij} = \frac{x_{ij} - \text{pred}_{ij}}{\text{rmse}_j},
 $$
-where $\text{pred}_{ij}$ is is the corresponding out-of-bag prediction of the $j$th random forest with RMSE $\text{rmse}_j$. If $|s_{ij}| > L$ with threshold $L$, then $x_{ij}$ is considered an outlier.
+where $\text{pred}_{ij}$ is the corresponding out-of-bag prediction of the $j$-th random forest with RMSE $\text{rmse}_j$. If $|s_{ij}| > L$ with threshold $L$, then $x_{ij}$ is considered an outlier.
 
 Why using random forests for calculating the conditional means? They often work well without parameter tuning, outliers in the input variables are no issue and the out-of-bag mechanism helps to provide fair outlier scores.
 
@@ -88,7 +88,7 @@ plot(y ~ x, data = Data(ch))
 plot(ch)
 ```
 
-Note that `outForest()` offers a `...` argument to pass options to its workhorse random forest implementation `ranger()`, e.g. `num.trees` or `mtry`. How would we use its "extra trees" variant with 50 trees? As data set, we add a couple of outliers to the famous iris flower data set.
+Note that `outForest()` offers a `...` argument to pass options to its workhorse random forest implementation `ranger()`, e.g., `num.trees` or `mtry`. How would we use its "extra trees" variant with 50 trees? As data set, we add a couple of outliers to the famous iris flower data set.
 
 ``` {r}
 head(irisWithOutliers <- generateOutliers(iris, p = 0.02))
@@ -138,9 +138,9 @@ Data(pred)
 
 ## The formula interface
 
-By default, `outForest()` uses all columns in the data set to check all numeric columns with missings. To override this behaviour, you can use its formula interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
+By default, `outForest()` uses all columns in the data set to check all numeric columns with missings. To override this behavior, you can use its formula interface: The left hand side specifies the variables to be checked (variable names separated by a `+`), while the right hand side lists the variables used for checking.
 
-So if you e.g. want to check only variable `Sepal.Length` based on `Species`, then use this syntax.
+If you want to check only variable `Sepal.Length` based on `Species`, then use this syntax.
 ``` {r}
 out <- outForest(irisWithOutliers, Sepal.Length ~ Species, verbose = 0)
 summary(out)
@@ -154,7 +154,7 @@ summary(out)
 
 ## Too many values are identified as outliers. Crap!
 
-For large data sets, just by chance, many values can surpass the default threshold of 3. To reduce the number of outliers, the threshold can be increased. Alternatively, the number of outliers can be limited by the two arguments `max_n_outliers` and `max_prop_outliers`. E.g. if at most three outliers are to be identified, set `max_n_outliers = 3`. If at most 1% of the values are to be declared as outliers, set `max_prop_outliers = 0.01`.
+For large data sets, just by chance, many values can surpass the default threshold of 3. To reduce the number of outliers, the threshold can be increased. Alternatively, the number of outliers can be limited by the two arguments `max_n_outliers` and `max_prop_outliers`. For instance, if at most three outliers are to be identified, set `max_n_outliers = 3`. If at most 1% of the values are to be declared as outliers, set `max_prop_outliers = 0.01`.
 
 ```{r}
 outliers(outForest(irisWithOutliers, max_n_outliers = 3, verbose = 0))
@@ -179,19 +179,11 @@ head(Data(out))
 
 ## The algorithm takes too much time. What can I do?
 
-`outForest()` is based on fitting one random forest for each numeric variable. Since the underlying random forest implementation `ranger()` uses 500 trees per default, a huge number of trees might be calculated. For larger data sets, the overall process can take very long.
+By default, `outForest()` fits a random forest with 500 trees per numeric variable. Thus, the overall process can take very long. Here a few tweaks to make things faster:
 
-Here are tweaks to make things faster:
-
-- Use less trees, e.g. by setting `num.trees = 50`. Don't use a too low value because this can lead to missing out-of-bag predictions.
-
-- Use smaller number of variables to be considered in a split, e.g. `mtry = 2`.
-
-- Use smaller bootstrap samples by setting e.g. `sample.fraction = 0.1`.
-
-- Use a low tree depth `max.depth = 6`.
-
-- Use large leafs, e.g. `min.node.size = 10000`.
+- Use less trees, e.g., by setting `num.trees = 50`.
+- Use smaller mtry, e.g., `mtry = 2`.
+- Use shorter trees, e.g., setting `max.depth = 6`.
+- Use large leaves, e.g., `min.node.size = 10000`.
 
 ## References
-
