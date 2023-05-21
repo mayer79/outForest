@@ -43,14 +43,14 @@ summary.outForest <- function(object, ...) {
 #' Plots outForest
 #'
 #' This function can plot aspects of an "outForest" object.
-#' For `what = "counts"`, the number of outliers per variable is visualized as a barplot.
-#' For `what = "scores"`, outlier scores (i.e. the scaled difference between
-#' predicted and observed value) are shown as scatter plot per variable.
+#' - With `what = "counts"`, the number of outliers per variable is visualized as a
+#'   barplot.
+#' - With `what = "scores"`, outlier scores (i.e., the scaled difference between
+#'   predicted and observed value) are shown as scatterplot per variable.
 #'
 #' @param x An object of class "outForest".
-#' @param what What should be plotted? One of "counts" (the default) or "scores".
-#' @param ... Further arguments passed to [graphics::barplot()] or
-#'   [graphics::stripchart()].
+#' @param what What should be plotted? Either `"counts"` (the default) or `"scores"`.
+#' @param ... Arguments passed to [graphics::barplot()] or [graphics::stripchart()].
 #' @returns A list.
 #' @export
 #' @examples

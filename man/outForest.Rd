@@ -79,7 +79,7 @@ function used to extract them.
 \item \code{allow_predictions}: Same as \code{allow_predictions}.
 \item \code{v}: Variables checked.
 \item \code{threshold}: The threshold used.
-\item \code{rmse}: Named vector of RMSE of the random forests. Used for scaling the
+\item \code{rmse}: Named vector of RMSEs of the random forests. Used for scaling the
 difference between observed values and predicted.
 \item \code{forests}: Named list of fitted random forests.
 \code{NULL} if \code{allow_predictions = FALSE}.
@@ -98,15 +98,13 @@ After identification of outliers, they can be replaced, e.g., by
 predictive mean matching from the non-outliers.
 }
 \details{
-Since the random forest algorithm "ranger" does not allow for missing values,
-any missing value is first being imputed by chained random forests.
 The method can be viewed as a multivariate extension of a basic univariate outlier
 detection method where a value is considered an outlier if it is more than, e.g.,
 three times the standard deviation away from its mean. In the multivariate case,
 instead of comparing a value with the overall mean, rather the difference to the
-conditional mean is considered. The 'outForest()' function estimates this conditional
+conditional mean is considered. \code{outForest()} estimates this conditional
 mean by a random forest. If the method is trained on a reference data with option
-\code{allow_predictions}, it can be applied to new data.
+\code{allow_predictions = TRUE}, it can even be applied to new data.
 
 The outlier score of the ith value \eqn{x_{ij}} of the jth variable is defined as
 \eqn{s_{ij} = (x_{ij} - p_{ij}) / \textrm{rmse}_j}, where \eqn{p_{ij}}
@@ -119,6 +117,9 @@ of 3. To reduce the number of outliers, the threshold can be increased.
 Alternatively, the number of outliers can be limited by the two arguments
 \code{max_n_outliers} and \code{max_prop_outliers}. For instance, if at most ten outliers
 are to be identified, set \code{max_n_outliers = 10}.
+
+Since the random forest algorithm "ranger" does not allow for missing values,
+any missing value is first being imputed by chained random forests.
 }
 \examples{
 head(irisWithOut <- generateOutliers(iris, seed = 345))
@@ -138,6 +139,6 @@ in press. <arxiv.org/abs/1508.04409>.
 }
 }
 \seealso{
-\code{\link{outliers}}, \code{\link{Data}}, \code{\link{plot.outForest}},
-\code{\link{summary.outForest}}, \code{\link{predict.outForest}}.
+\code{\link[=outliers]{outliers()}}, \code{\link[=Data]{Data()}} \code{\link[=plot.outForest]{plot.outForest()}}, \code{\link[=summary.outForest]{summary.outForest()}},
+\code{\link[=predict.outForest]{predict.outForest()}}
 }
