@@ -1,54 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/outForest.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/Data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generateOutliers.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/is.outForest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/outForest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/outliers.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot.outForest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/predict.outForest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/print.outForest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/summary.outForest.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/outForest.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/Data.html</loc></url>
+<url><loc>/reference/generateOutliers.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/is.outForest.html</loc></url>
+<url><loc>/reference/outForest.html</loc></url>
+<url><loc>/reference/outliers.html</loc></url>
+<url><loc>/reference/plot.outForest.html</loc></url>
+<url><loc>/reference/predict.outForest.html</loc></url>
+<url><loc>/reference/print.outForest.html</loc></url>
+<url><loc>/reference/summary.outForest.html</loc></url>
 </urlset>
+
