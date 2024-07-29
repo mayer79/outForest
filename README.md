@@ -4,7 +4,7 @@
 
 [![R-CMD-check](https://github.com/mayer79/outForest/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mayer79/outForest/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/mayer79/outForest/graph/badge.svg)](https://app.codecov.io/gh/mayer79/outForest?branch=main)
-[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version//outForest)](https://cran.r-project.org/package=/outForest)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/outForest)](https://cran.r-project.org/package=outForest)
 
 [![](https://cranlogs.r-pkg.org/badges/outForest)](https://cran.r-project.org/package=outForest) 
 [![](https://cranlogs.r-pkg.org/badges/grand-total/outForest?color=orange)](https://cran.r-project.org/package=outForest)
