@@ -1,6 +1,6 @@
-#=============================================================================
+# =============================================================================
 # Put together the package
-#=============================================================================
+# =============================================================================
 
 # WORKFLOW: UPDATE EXISTING PACKAGE
 # 1) Modify package content and documentation.
@@ -15,7 +15,7 @@ library(usethis)
 use_description(
   fields = list(
     Title = "Multivariate Outlier Detection and Replacement",
-    Version = "1.0.1",
+    Version = "1.0.2",
     Description = "Provides a random forest based implementation of the method described
     in Chapter 7.1.2 (Regression model based anomaly detection) of
     Chandola et al. (2009) <doi:10.1145/1541880.1541882>.
@@ -43,8 +43,10 @@ use_gpl_license(2)
 use_github_links() # use this if this project is on github
 
 # Your files that do not belong to the package itself (others are added by "use_* function")
-use_build_ignore(c("^packaging.R$", "[.]Rproj$", "^backlog$",
-                   "^cran-comments.md$", "^logo.png$"), escape = FALSE)
+use_build_ignore(c(
+  "^packaging.R$", "[.]Rproj$", "^backlog$",
+  "^cran-comments.md$", "^logo.png$"
+), escape = FALSE)
 
 # If your code uses the pipe operator %>%
 # use_pipe()
@@ -76,9 +78,9 @@ use_github_action("check-standard")
 use_github_action("test-coverage")
 use_github_action("pkgdown")
 
-#=============================================================================
+# =============================================================================
 # Finish package building (can use fresh session)
-#=============================================================================
+# =============================================================================
 
 library(devtools)
 

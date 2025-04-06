@@ -1,3 +1,9 @@
+# outForest 1.0.2
+
+### Maintenance
+
+- Update code coverage version [#16](https://github.com/mayer79/outForest/pull/16).
+
 # outForest 1.0.1
 
 - Use latex formulas in help files.
